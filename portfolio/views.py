@@ -418,7 +418,23 @@ def ticker_data(request):
     try:
         stock_symbols = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL']
         symbols_str = ','.join(stock_symbols)
-        url = f'https://api.twelvedata.com/price?symbol={symbols_str}&apikey={TWELVE_DATA_KEY}'
+        stock_symbols = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'META', 'AMZN', 'JPM', 'V', 'WMT']
+        symbols_str = ','.join(stock_symbols)
+        url = f'https://api.twelvedata.com/quote?symbol={symbols_str}&apikey={TWELVE_DATA_KEY}'
+        r = requests.get(url, timeout=10)
+        data = r.json()
+        for symbol in stock_symbols:
+            if symbol in data and isinstance(data[symbol], dict):
+                val = data[symbol]
+                price = float(val.get('close', 0) or 0)
+                prev = float(val.get('previous_close', price) or price)
+                change = ((price - prev) / prev * 100) if prev else 0
+                if price:
+                    results.append({
+                        'symbol': symbol,
+                        'price': price,
+                        'change': round(change, 2),
+                    })
         r = requests.get(url, timeout=10)
         data = r.json()
         
