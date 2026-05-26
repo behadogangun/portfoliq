@@ -378,8 +378,15 @@ def asset_info(request):
 
 
 @login_required
+@login_required
 def ticker_data(request):
     """Live ticker price data."""
+    from django.core.cache import cache
+    
+    cached = cache.get('ticker_data')
+    if cached:
+        return JsonResponse({'tickers': cached})
+
     crypto_symbols = [
         ('BTC', 'bitcoin'),
         ('ETH', 'ethereum'),
@@ -398,11 +405,12 @@ def ticker_data(request):
     ]
     results = []
 
+    # Crypto — CoinGecko tek istekle hepsini çeker
     try:
         ids = ','.join([s[1] for s in crypto_symbols])
         r = requests.get(
             f'https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd&include_24hr_change=true',
-            timeout=5
+            timeout=8
         )
         data = r.json()
         for sym, coin_id in crypto_symbols:
@@ -415,18 +423,41 @@ def ticker_data(request):
     except Exception:
         pass
 
-    for symbol in stock_symbols:
-        try:
-            info = get_stock_info(symbol)
-            if info:
+    # Stocks — Alpha Vantage batch yerine tek tek ama hızlı
+    try:
+        symbols_str = ','.join(stock_symbols)
+        url = (
+            f'https://www.alphavantage.co/query'
+            f'?function=BATCH_STOCK_QUOTES&symbols={symbols_str}&apikey={ALPHA_VANTAGE_KEY}'
+        )
+        r = requests.get(url, timeout=10)
+        data = r.json()
+        quotes = data.get('Stock Quotes', [])
+        for q in quotes:
+            symbol = q.get('1. symbol', '')
+            price = float(q.get('2. price', 0))
+            change = float(q.get('4. change percent', '0%').replace('%', ''))
+            if symbol and price:
                 results.append({
                     'symbol': symbol,
-                    'price': info['price'],
-                    'change': info['change_24h'],
+                    'price': price,
+                    'change': round(change, 2),
                 })
-        except Exception:
-            pass
+    except Exception:
+        # Fallback: yfinance ile tek tek dene
+        for symbol in stock_symbols[:5]:  # Sadece ilk 5'i dene
+            try:
+                info = get_stock_info(symbol)
+                if info and info.get('price'):
+                    results.append({
+                        'symbol': symbol,
+                        'price': info['price'],
+                        'change': info['change_24h'],
+                    })
+            except Exception:
+                continue
 
+    cache.set('ticker_data', results, 120)
     return JsonResponse({'tickers': results})
 
 
