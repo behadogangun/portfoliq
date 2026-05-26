@@ -409,9 +409,10 @@ def ticker_data(request):
                     'price': data[coin_id]['usd'],
                     'change': round(data[coin_id].get('usd_24h_change', 0), 2),
                 })
-        logger.error(f'CRYPTO OK: {len(results)} items, data keys: {list(data.keys())[:3]}')
+        
     except Exception as e:
-        logger.error(f'CRYPTO ERROR: {e}')
+        pass
+        
 
     # Stocks
     try:
@@ -420,7 +421,7 @@ def ticker_data(request):
         url = f'https://api.twelvedata.com/price?symbol={symbols_str}&apikey={TWELVE_DATA_KEY}'
         r = requests.get(url, timeout=10)
         data = r.json()
-        logger.error(f'STOCKS RAW: {str(data)[:200]}')
+        
         for symbol in stock_symbols:
             if symbol in data and isinstance(data[symbol], dict) and 'price' in data[symbol]:
                 results.append({
@@ -429,9 +430,9 @@ def ticker_data(request):
                     'change': 0,
                 })
     except Exception as e:
-        logger.error(f'STOCKS ERROR: {e}')
+        pass
 
-    logger.error(f'TICKER TOTAL: {len(results)} results')
+    
     cache.set('ticker_data', results, 120)
     return JsonResponse({'tickers': results})
 
