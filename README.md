@@ -7,6 +7,7 @@
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
 [![Tests](https://img.shields.io/badge/Tests-159%20Passing-2ea44f?style=for-the-badge&logo=pytest&logoColor=white)](#-tests)
 [![License](https://img.shields.io/badge/License-MIT-F7B731?style=for-the-badge)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://portfoliq.onrender.com)
 
 [🐛 Report Bug](https://github.com/behadogangun/portfoliq/issues) · [💡 Request Feature](https://github.com/behadogangun/portfoliq/issues)
 
@@ -264,5 +265,5 @@ MIT © 2026 [Beha Doğangun](https://github.com/behadogangun)
 ---
 
 **PortfoliQ** — Track smarter, invest better. 📈
-
+[🚀 Live Demo](https://portfoliq.onrender.com) · [🐛 Report Bug](https://github.com/behadogangun/portfoliq/issues)
 ⭐ If you find this project useful, consider giving it a star!
