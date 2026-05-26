@@ -116,6 +116,24 @@ def get_stock_info(symbol):
 
 
 def search_stocks(query):
+    # Önce yfinance dene — daha güvenilir
+    try:
+        import yfinance as yf
+        ticker = yf.Ticker(query.upper())
+        info = ticker.info
+        name = info.get('longName') or info.get('shortName', '')
+        price = info.get('currentPrice') or info.get('regularMarketPrice') or 0
+        if name and price:
+            return [{
+                'symbol': query.upper(),
+                'name': name,
+                'logo': f'https://financialmodelingprep.com/image-stock/{query.upper()}.png',
+                'type': 'stock',
+            }]
+    except Exception:
+        pass
+
+    # Fallback: Alpha Vantage
     try:
         url = (
             f'https://www.alphavantage.co/query'
