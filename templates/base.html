@@ -447,16 +447,19 @@ function skipOnboarding() {
     const csrfToken = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1] || '';
     fetch('/onboarding/done/', { method: 'POST', headers: { 'X-CSRFToken': csrfToken } });
 }
-{% if show_onboarding %}
+{% if user.is_authenticated %}
 document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('pq_onboarding_done') === '1') return;
+    {% if show_onboarding %}
     const overlay = document.getElementById('onboardingOverlay');
     const modal = document.getElementById('onboardingModal');
     if (overlay && modal) {
         overlay.style.display = 'block';
         modal.style.display = 'block';
+        onboardingStep = 0;
         renderOnboardingStep();
     }
+    {% endif %}
 });
 {% endif %}
 let tickerLoaded = false;
