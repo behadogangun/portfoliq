@@ -408,19 +408,20 @@ def ticker_data(request):
     results = []
 
     # Crypto — CoinGecko tek istekle hepsini çeker
+    # Stocks — Twelve Data batch
     try:
-        ids = ','.join([s[1] for s in crypto_symbols])
-        r = requests.get(
-            f'https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd&include_24hr_change=true',
-            timeout=8
-        )
+        TWELVE_DATA_KEY = os.environ.get('TWELVE_DATA_KEY', '')
+        symbols_str = ','.join(stock_symbols)
+        url = f'https://api.twelvedata.com/price?symbol={symbols_str}&apikey={TWELVE_DATA_KEY}'
+        r = requests.get(url, timeout=10)
         data = r.json()
-        for sym, coin_id in crypto_symbols:
-            if coin_id in data:
+        for symbol in stock_symbols:
+            if symbol in data and 'price' in data[symbol]:
+                price = float(data[symbol]['price'])
                 results.append({
-                    'symbol': sym,
-                    'price': data[coin_id]['usd'],
-                    'change': round(data[coin_id].get('usd_24h_change', 0), 2),
+                    'symbol': symbol,
+                    'price': price,
+                    'change': 0,
                 })
     except Exception:
         pass

@@ -19,6 +19,7 @@ COINGECKO_IDS = {
 
 ALPHA_VANTAGE_KEY = os.environ.get('ALPHA_VANTAGE_KEY', 'demo')
 NEWS_API_KEY = os.environ.get('NEWS_API_KEY', '')
+TWELVE_DATA_KEY = os.environ.get('TWELVE_DATA_KEY', '')
 
 
 # --- Kripto ---
@@ -91,36 +92,24 @@ def get_stock_info(symbol):
     if cached:
         return cached
     try:
-        # Alpha Vantage global quote — hızlı REST API
-        url = (
-            f'https://www.alphavantage.co/query'
-            f'?function=GLOBAL_QUOTE&symbol={symbol}&apikey={ALPHA_VANTAGE_KEY}'
-        )
-        r = requests.get(url, timeout=8)
-        data = r.json().get('Global Quote', {})
-        
-        price = float(data.get('05. price', 0))
-        prev_close = float(data.get('08. previous close', 0))
-        change_pct = float(data.get('10. change percent', '0').replace('%', ''))
-        
+        url = f'https://api.twelvedata.com/quote?symbol={symbol}&apikey={TWELVE_DATA_KEY}'
+        r = requests.get(url, timeout=6)
+        data = r.json()
+
+        price = float(data.get('close', 0) or data.get('previous_close', 0))
+        prev_close = float(data.get('previous_close', price))
+        name = data.get('name', symbol)
+        change_24h = ((price - prev_close) / prev_close * 100) if prev_close else 0
+
         if not price:
             raise ValueError('No price')
-        
-        # İsim için yfinance — sadece bir kez çağrılır, cache'lenir
-        name = symbol
-        try:
-            import yfinance as yf
-            info = yf.Ticker(symbol).info
-            name = info.get('longName') or info.get('shortName', symbol)
-        except Exception:
-            pass
-        
+
         result = {
             'symbol': symbol.upper(),
             'name': name,
             'logo': f'https://financialmodelingprep.com/image-stock/{symbol}.png',
-            'price': price,
-            'change_24h': round(change_pct, 2),
+            'price': round(price, 2),
+            'change_24h': round(change_24h, 2),
             'market_cap': 0,
             'volume_24h': 0,
             'sector': '',
@@ -132,8 +121,7 @@ def get_stock_info(symbol):
         # Fallback: yfinance
         try:
             import yfinance as yf
-            ticker = yf.Ticker(symbol)
-            info = ticker.info
+            info = yf.Ticker(symbol).info
             price = info.get('currentPrice') or info.get('regularMarketPrice') or 0
             prev_close = info.get('previousClose') or price
             change_24h = ((price - prev_close) / prev_close * 100) if prev_close else 0
