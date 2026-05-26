@@ -1,100 +1,132 @@
-# PortfoliQ 📈
+<div align="center">
 
-> A full-stack investment portfolio tracker built with Django — featuring real-time market data, AI-powered insights, advanced analytics, and 30+ unique features.
+<br/>
 
-![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python&logoColor=white)
-![Django](https://img.shields.io/badge/Django-6.0-green?logo=django&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-159%20passing-brightgreen?logo=pytest)
-![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple?logo=bootstrap&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-yellow)
-![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
+```
+██████╗  ██████╗ ██████╗ ████████╗███████╗ ██████╗ ██╗     ██╗ ██████╗
+██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝██╔════╝██╔═══██╗██║     ██║██╔═══██╗
+██████╔╝██║   ██║██████╔╝   ██║   █████╗  ██║   ██║██║     ██║██║   ██║
+██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══╝  ██║   ██║██║     ██║██║▄▄ ██║
+██║     ╚██████╔╝██║  ██║   ██║   ██║     ╚██████╔╝███████╗██║╚██████╔╝
+╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚══▀▀═╝
+```
+
+### 📈 Full-Stack Investment Portfolio Tracker
+
+<br/>
+
+[![Python](https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Django](https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
+[![Tests](https://img.shields.io/badge/Tests-159%20Passing-2ea44f?style=for-the-badge&logo=pytest&logoColor=white)](#-tests)
+[![License](https://img.shields.io/badge/License-MIT-F7B731?style=for-the-badge)](LICENSE)
+
+<br/>
+
+> *Track stocks · crypto · gold · Real-time prices · AI insights · Advanced analytics*
+
+<br/>
+
+</div>
 
 ---
 
-## 📋 Table of Contents
+## ✨ What is PortfoliQ?
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Installation](#-installation)
-- [Environment Variables](#-environment-variables)
-- [Project Structure](#-project-structure)
-- [URL Map](#-url-map)
-- [API Endpoints](#-api-endpoints)
-- [Tests](#-tests)
-- [Deploy](#-deploy)
+PortfoliQ is a **full-stack investment portfolio tracker** built with Django. It combines real-time market data from multiple APIs with AI-powered analytics — giving individual investors access to tools previously only available on Bloomberg terminals.
+
+<br/>
+
+<div align="center">
+
+📊 **30+ Features** &nbsp;·&nbsp; 🧠 **AI Insights** &nbsp;·&nbsp; 📈 **Advanced Analytics** &nbsp;·&nbsp; 🇹🇷 **BIST Support** &nbsp;·&nbsp; 🌙 **Dark Mode** &nbsp;·&nbsp; ✅ **159 Tests**
+
+</div>
 
 ---
 
-## 🚀 Features
+## 🗂️ Features
 
-### 📊 Core Portfolio Management
-- **Multi-portfolio support** — Create and manage unlimited portfolios
-- **Asset tracking** — Stocks, crypto, gold, currency, and other asset types
-- **Transaction history** — Full buy/sell log with automatic weighted avg. price calculation
-- **Real-time prices** — Live data via CoinGecko, yfinance, Alpha Vantage APIs
-- **Price History** — Stored per-asset price snapshots for historical analysis
-- **CSV & PDF export** — Professional portfolio reports with ReportLab
-- **Watchlist** — Track assets without owning them
-- **Price Alerts** — AJAX-powered alerts with toast notifications (checks every 60s)
+<table>
+<tr>
+<td width="50%" valign="top">
 
-### 🧠 Portfolio Intelligence
-- **Portfolio Health Score** — A–D letter grade with 4 sub-scores: Diversification, Concentration Risk, Profitability, Risk Management
-- **Portfolio DNA** — Analyzes your allocation and assigns an investor personality: Crypto Maximalist, Stock Market Pro, Safe Haven Seeker, Balanced Innovator, Alpha Hunter, Diamond Hands, Cautious Strategist
-- **Smart Rebalancing** — Suggests buy/reduce actions to hit ideal allocation targets
-- **Correlation Matrix** — Pearson correlation between all your assets using price history
-- **Fear & Greed Index** — Live Alternative.me crypto sentiment with emoji gauge
+**📊 Portfolio Management**
+- Multi-portfolio support
+- Stocks · Crypto · Gold · Currency
+- Transaction history + avg. cost tracking
+- Real-time price refresh (AJAX)
+- CSV & PDF export via ReportLab
+- Watchlist & Price Alerts (60s AJAX check)
 
-### 📈 Advanced Analytics
-- **Portfolio Beta** — Weighted beta vs. S&P 500 (SPY) using 1-year daily returns
-- **Portfolio Volatility Chart** — 10-day rolling annualized volatility over 3 months
-- **Monte Carlo Simulation** — Up to 1,000 random simulations of future portfolio value with histogram distribution and 5th/25th/50th/75th/95th percentile outcomes
-- **Efficient Frontier** — Markowitz risk/return optimization with 300 random portfolios, Max Sharpe and Min Risk portfolio detection, scatter chart visualization
-- **Risk Analysis per Asset** — Sharpe ratio, annualized volatility, max drawdown, total return, avg. daily return
+**🧠 Intelligence**
+- **Health Score** — A–D grade with 4 sub-metrics
+- **Portfolio DNA** — Investor personality type
+- **Smart Rebalancing** — Target allocation hints
+- **Correlation Matrix** — Pearson correlation
+- **Fear & Greed Index** — Live Alternative.me
 
-### 🛠️ Tools
-- **What-If Simulator** — Historical simulation: "What if I invested $X in Y asset Z days ago?"
-- **Regret Calculator** — Side-by-side performance comparison of two assets over the same period
-- **Break-Even Calculator** — Progress bars showing how far each asset is from profit
-- **DCA Planner** — Dollar Cost Averaging projection with monthly compounding chart
-- **Portfolio Comparison** — Compare two of your portfolios side by side with a return bar chart
+**📈 Advanced Analytics**
+- **Portfolio Beta** — Weighted vs. S&P 500
+- **Volatility Chart** — 10-day rolling annualized
+- **Monte Carlo** — Up to 1,000 path simulations
+- **Efficient Frontier** — Markowitz optimization
+- **Risk per Asset** — Sharpe · Drawdown · VaR
 
-### 🌍 Market & Research
-- **Market Overview** — Top 20 cryptos by market cap with 7-day sparklines + top 20 stocks
-- **Market Heatmap** — S&P 500 style colored grid, 5 sectors × 10 stocks
-- **Sector Rotation Tracker** — 11 ETF sectors (XLK, XLV, XLF...) with 1D/1W/1M performance
-- **Market Mood Ring** — 6 indicators (Fear & Greed, S&P 500, VIX, Bitcoin, Gold, DXY) combined into a 0–100 sentiment score
-- **Earnings Calendar** — Upcoming earnings for 20 major S&P 500 companies with days-away color coding
-- **Short Squeeze Detector** — 24 high-short-interest stocks ranked by proprietary squeeze score
-- **Economic Calendar** — 25+ macro events (Fed, CPI, NFP, ECB, TCMB) with country flags and impact filtering
-- **IPO Tracker** — Upcoming and recent IPOs from NASDAQ calendar API
-- **Insider Trading Feed** — Executive buy/sell activity via yfinance SEC filings
+</td>
+<td width="50%" valign="top">
 
-### 🏆 Investor Research
-- **Portfolio vs Famous Investors** — Daily return comparison vs. Warren Buffett, Cathie Wood (ARK), Ray Dalio (All Weather), Michael Burry
-- **Price Targets** — Analyst consensus targets (low/mean/high) with upside % and visual price range bar
-- **Dividend Tracker** — Annual/monthly income per stock, dividend yield, payout ratio, recent payment history
-- **Crisis Simulator** — Apply 5 historical crises to your portfolio: 2008 Financial Crisis, COVID-19 Crash, 2022 Crypto Winter, Dot-com Bubble, Black Monday 1987 — with per-asset symbol-specific historical drops
+**🛠️ Tools**
+- **What-If Simulator** — Historical what if?
+- **Regret Calculator** — Two-asset comparison
+- **Break-Even** — Progress to profit bar
+- **DCA Planner** — Monthly compounding chart
+- **Portfolio Compare** — Side-by-side P&L
 
-### 🇹🇷 Turkey
-- **BIST Market** — Top 15 Borsa İstanbul stocks with real-time TRY prices via yfinance (.IS suffix)
-- **USD/TRY Rate** — Live exchange rate with portfolio value converted to TRY
-- **TCMB Event** — Turkish Central Bank interest rate decision in Economic Calendar
+**🌍 Market & Research**
+- **Market Heatmap** — S&P 500 style grid
+- **Sector Rotation** — 11 ETF sectors 1D/1W/1M
+- **Market Mood Ring** — 6-indicator score 0–100
+- **Earnings Calendar** — Color-coded days-away
+- **Short Squeeze Detector** — Ranked candidates
+- **Economic Calendar** — 25+ macro events + flags
+- **IPO Tracker** · **Insider Trading Feed**
 
-### ✨ UI/UX
-- **Apple-inspired design system** — Custom CSS: `pq-card`, `pq-nav`, `btn-apple`, `pq-input`, `pq-table`
-- **Dark mode** — Toggle with smooth transition, persisted via localStorage
-- **Live ticker band** — 28 symbols scrolling below navbar (BTC, ETH, BNB, SOL, XRP, ADA, DOGE, AVAX + 20 major stocks)
-- **Mobile responsive** — Full hamburger menu with scrollable sections
-- **Onboarding flow** — 5-step guided modal, localStorage persistent (never repeats)
-- **Shareable portfolio card** — Dark card downloadable as PNG via html2canvas
-- **Micro-animations** — card-enter fade-in, badge-pulse on profit/loss, page-enter transitions, skeleton-shimmer loading
-- **3 Navbar dropdowns** — Analytics (9 items), Tools (7 items), 🇹🇷 Turkey
-- **Confetti easter egg** — Triggers when portfolio return exceeds 10%
+**🏆 Investor Research**
+- **Famous Investors** — Buffett · ARK · Dalio · Burry
+- **Price Targets** — Analyst consensus + upside bar
+- **Dividend Tracker** — Annual income per stock
+- **Crisis Simulator** — 5 historical crash scenarios
 
-### ⚡ Performance
-- **Django LocMemCache** — 60-second cache on crypto/stock prices; 5-minute cache on market mood; 1-hour cache on earnings and famous portfolios
-- **select_related + prefetch_related** — All views optimized to avoid N+1 queries
-- **Prefetched ordering** — `PriceHistory.objects.order_by('-timestamp')` in all asset queries
+</td>
+</tr>
+</table>
+
+---
+
+## 🇹🇷 Turkey Features
+
+| | Feature | Description |
+|---|---|---|
+| 🏛️ | **BIST Market** | Top 15 Borsa İstanbul stocks with live TRY prices |
+| 💱 | **USD/TRY Rate** | Live rate · portfolio value converted to Turkish Lira |
+| 🏦 | **TCMB Calendar** | Central bank rate decisions in Economic Calendar |
+
+---
+
+## 🎨 UI / UX
+
+| | Feature | Details |
+|---|---|---|
+| 🍎 | **Apple Design System** | `pq-card` · `btn-apple` · `pq-nav` · `pq-input` · `pq-table` |
+| 🌙 | **Dark Mode** | localStorage persistent · smooth CSS transition |
+| 📡 | **Live Ticker** | 28 symbols scrolling: BTC · ETH · AAPL · TSLA · NVDA + more |
+| 📱 | **Mobile Responsive** | Hamburger menu with Analytics · Tools · Turkey sections |
+| 🎯 | **Onboarding Flow** | 5-step guided modal · localStorage persistent |
+| 🃏 | **Share Card** | Portfolio as downloadable dark PNG via html2canvas |
+| ✨ | **Animations** | card-enter · badge-pulse · page-enter · skeleton-shimmer |
+| 🎊 | **Easter Egg** | Confetti when portfolio return exceeds 10% |
+| ⚡ | **API Cache** | Django LocMemCache — 60s to 1hr TTL per endpoint |
 
 ---
 
@@ -104,27 +136,33 @@
 python manage.py test
 ```
 
-### ✅ 159 Tests Passing in 118s
+<div align="center">
 
-| Test Class | Tests | Description |
-|---|---|---|
-| `PortfolioModelTest` | 17 | Model methods: total_cost, current_value, profit_loss, total_value |
+✅ &nbsp; **159 tests passing** &nbsp; · &nbsp; 17 test classes &nbsp; · &nbsp; ~118 seconds
+
+</div>
+
+<br/>
+
+| Test Class | # | Coverage |
+|---|:---:|---|
+| `PortfolioModelTest` | 17 | Model methods: total_cost, current_value, profit_loss, edge cases |
 | `PortfolioViewTest` | 18 | CRUD views, auth redirects, search, context data |
 | `TransactionTest` | 6 | Buy/sell quantity updates, avg price recalculation |
 | `AuthViewTest` | 9 | Login, register, logout, profile, redirects |
-| `WatchlistTest` | 5 | Add, remove, duplicate prevention, auth |
-| `PriceAlertTest` | 7 | Create, delete, alert types, cross-user security |
-| `RiskMetricsTest` | 8 | Sharpe, volatility, drawdown, edge cases |
+| `WatchlistTest` | 5 | Add, remove, duplicate prevention |
+| `PriceAlertTest` | 7 | Create, delete, types, cross-user security |
+| `RiskMetricsTest` | 8 | Sharpe ratio, volatility, drawdown, edge cases |
 | `AjaxTest` | 7 | Ticker, search, alert check, auth guards |
 | `ExportTest` | 5 | CSV content, PDF content-type, permissions |
-| `AnalyticsViewTest` | 30 | All new feature views load correctly |
-| `CrisisSimulatorTest` | 7 | 2008, COVID, Crypto Winter, invalid input, empty assets |
-| `MarketMoodServiceTest` | 3 | Score range 0-100, indicators present, return type |
+| `AnalyticsViewTest` | 30 | All new feature views: status 200 + auth 302 |
+| `CrisisSimulatorTest` | 7 | 5 crisis scenarios, invalid input, empty assets |
+| `MarketMoodServiceTest` | 3 | Score 0–100 range, indicators present, return type |
 | `EconomicCalendarTest` | 3 | List type, required fields, date sorting |
 | `FamousInvestorsTest` | 2 | List type, required fields per investor |
-| `IntelligenceServiceTest` | 10 | Health score A-D, DNA personality, rebalancing, correlation |
-| `CacheTest` | 2 | Cache hit verification on second load |
-| `NewFeatureViewTest` | 18 | All tool and tracker pages: status 200 + auth 302 |
+| `IntelligenceServiceTest` | 10 | Health A–D, DNA, rebalancing, correlation |
+| `CacheTest` | 2 | Cache hit verification on second API call |
+| `NewFeatureViewTest` | 18 | All tool and tracker pages load correctly |
 
 ---
 
@@ -132,79 +170,60 @@ python manage.py test
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| Backend | Django 6.0.5 | Web framework |
-| API Framework | Django REST Framework | REST API endpoints |
-| Database | SQLite (dev) / PostgreSQL (prod) | Data persistence |
-| Frontend | Bootstrap 5.3, Bootstrap Icons | UI components |
-| Charts | Chart.js 4.4 | Line, bar, scatter, donut charts |
-| Image Export | html2canvas 1.4.1 | Portfolio card PNG download |
-| Market Data | yfinance | Stocks, crypto, ETFs, beta, dividends |
-| Crypto | CoinGecko API (free tier) | Crypto prices, market data, sparklines |
-| Stocks | Alpha Vantage (free tier) | Stock search, gold, currency |
-| News | NewsAPI (free tier) | Market and asset-specific news |
-| Sentiment | Alternative.me | Fear & Greed Index |
-| PDF | ReportLab | Portfolio PDF report generation |
-| Cache | Django LocMemCache | In-memory API response caching |
-| Auth | Django built-in | Session-based authentication |
-| Deploy | Render | Production cloud hosting |
-| Python | 3.14.3 | Runtime |
+| **Backend** | Django 6.0.5 · Django REST Framework | Web framework · REST API |
+| **Database** | SQLite (dev) · PostgreSQL (prod) | Data persistence |
+| **Frontend** | Bootstrap 5.3 · Bootstrap Icons | UI components |
+| **Charts** | Chart.js 4.4 | Line · Bar · Scatter · Donut |
+| **Market Data** | yfinance · CoinGecko API · Alpha Vantage | Stocks · Crypto · ETFs |
+| **News** | NewsAPI | Market & asset-specific news |
+| **Sentiment** | Alternative.me | Fear & Greed Index |
+| **PDF** | ReportLab | Portfolio report generation |
+| **Image Export** | html2canvas 1.4.1 | Portfolio card PNG download |
+| **Cache** | Django LocMemCache | In-memory API response caching |
+| **Auth** | Django built-in | Session-based authentication |
+| **Python** | 3.14.3 | Runtime |
 
 ---
 
 ## ⚙️ Installation
 
 ```bash
-# 1. Clone the repository
+# 1 — Clone
 git clone https://github.com/behadogangun/portfoliq.git
 cd portfoliq
 
-# 2. Create virtual environment
+# 2 — Virtual environment
 python -m venv venv
-source venv/bin/activate      # macOS/Linux
-# venv\Scripts\activate       # Windows
+source venv/bin/activate        # Windows: venv\Scripts\activate
 
-# 3. Install dependencies
+# 3 — Dependencies
 pip install -r requirements.txt
 
-# 4. Create environment file
-cp .env.example .env
-# Edit .env and add your API keys
+# 4 — Environment
+cp .env.example .env            # Fill in your API keys
 
-# 5. Run database migrations
+# 5 — Database
 python manage.py migrate
 
-# 6. (Optional) Create admin superuser
-python manage.py createsuperuser
-
-# 7. Start development server
+# 6 — Run
 python manage.py runserver
 ```
 
-Open `http://127.0.0.1:8000` in your browser.
+🌐 &nbsp; Open **http://127.0.0.1:8000**
 
 ---
 
 ## 🔑 Environment Variables
 
-Create a `.env` file in the project root:
-
 ```env
-SECRET_KEY=your-django-secret-key-here
-DEBUG=True
-ALPHA_VANTAGE_KEY=your-alpha-vantage-key
-NEWS_API_KEY=your-newsapi-key
-FINNHUB_KEY=your-finnhub-key
+SECRET_KEY        = your-django-secret-key
+DEBUG             = True
+ALPHA_VANTAGE_KEY = your-key     # alphavantage.co — free tier
+NEWS_API_KEY      = your-key     # newsapi.org     — free tier
+FINNHUB_KEY       = your-key     # finnhub.io      — free tier
 ```
 
-**Free API Keys:**
-
-| Service | URL | Usage |
-|---|---|---|
-| Alpha Vantage | https://alphavantage.co | Stock symbol search, gold/currency prices |
-| NewsAPI | https://newsapi.org | Market news, asset-specific news |
-| Finnhub | https://finnhub.io | Economic calendar events |
-
-> **Note:** yfinance and CoinGecko work without API keys. The app degrades gracefully without them.
+> **yfinance** and **CoinGecko** require no API key — app works without them.
 
 ---
 
@@ -213,93 +232,33 @@ FINNHUB_KEY=your-finnhub-key
 ```
 portfoliq/
 │
-├── accounts/                    # Authentication app
-│   ├── views.py                 # register, login, logout, profile, change_password
-│   ├── forms.py                 # RegisterForm
-│   └── urls.py
+├── accounts/                    # Auth: login · register · profile
+├── api/                         # DRF: PortfolioViewSet · AssetViewSet
 │
-├── api/                         # Django REST Framework
-│   ├── views.py                 # PortfolioViewSet, AssetViewSet
-│   └── urls.py
-│
-├── portfolio/                   # Main application
-│   ├── models.py                # Portfolio, Asset, Transaction, PriceHistory,
-│   │                            # PriceAlert, WatchlistItem
-│   ├── views.py                 # 45+ views (1,349 lines)
-│   ├── services.py              # All API integrations & business logic (1,400+ lines)
-│   │   ├── get_crypto_price / get_crypto_info / search_crypto
-│   │   ├── get_stock_info / search_stocks
-│   │   ├── get_gold_price / get_currency_price
-│   │   ├── fetch_price / fetch_asset_info
-│   │   ├── get_top_cryptos / get_top_stocks
-│   │   ├── get_asset_news / get_market_news
-│   │   ├── calculate_risk_metrics
-│   │   ├── get_fear_greed_index
-│   │   ├── calculate_portfolio_health
-│   │   ├── get_smart_rebalancing
-│   │   ├── get_historical_price
-│   │   ├── get_correlation_matrix
-│   │   ├── calculate_portfolio_dna
-│   │   ├── get_dividend_info
-│   │   ├── calculate_portfolio_beta
-│   │   ├── get_sector_rotation
-│   │   ├── get_ipo_calendar
-│   │   ├── get_insider_trading
-│   │   ├── get_price_targets
-│   │   ├── get_portfolio_volatility
-│   │   ├── monte_carlo_simulation
-│   │   ├── calculate_efficient_frontier
-│   │   ├── get_tcmb_rate / get_bist_stock / get_bist_overview
-│   │   ├── get_economic_calendar
-│   │   ├── get_market_mood
-│   │   ├── get_earnings_calendar
-│   │   ├── get_short_squeeze_candidates
-│   │   ├── get_famous_portfolios
-│   │   └── crisis_simulator
-│   ├── forms.py                 # PortfolioForm, AssetForm, TransactionForm
+├── portfolio/
+│   ├── models.py                # Portfolio · Asset · Transaction
+│   │                            # PriceHistory · PriceAlert · WatchlistItem
+│   ├── views.py                 # 45+ views
+│   ├── services.py              # 35+ service functions (1,400+ lines)
 │   ├── urls.py                  # 45+ URL patterns
-│   ├── admin.py                 # All models registered
-│   ├── tests.py                 # 159 tests across 17 test classes
+│   ├── tests.py                 # 159 tests · 17 test classes
+│   ├── admin.py
+│   ├── forms.py
 │   └── templatetags/
-│       └── filters.py           # format_currency, format_price, format_number,
-│                                # format_quantity, split, index, convert_currency
+│       └── filters.py           # format_currency · format_price · format_quantity
 │
 ├── templates/
-│   ├── base.html                # Navbar (3 dropdowns), live ticker, dark mode,
-│   │                            # onboarding modal, mobile menu
-│   ├── accounts/
-│   │   ├── login.html
-│   │   ├── register.html
-│   │   └── profile.html
-│   └── portfolio/               # 35+ templates
-│       ├── landing.html         ├── intelligence.html
-│       ├── dashboard.html       ├── whatif.html
-│       ├── portfolio_list.html  ├── regret.html
-│       ├── portfolio_detail.html├── breakeven.html
-│       ├── portfolio_card.html  ├── heatmap.html
-│       ├── asset_form.html      ├── dca_planner.html
-│       ├── asset_detail.html    ├── dividend_tracker.html
-│       ├── market.html          ├── portfolio_beta.html
-│       ├── watchlist.html       ├── sector_rotation.html
-│       ├── alerts.html          ├── ipo_tracker.html
-│       ├── news.html            ├── insider_trading.html
-│       ├── price_targets.html   ├── volatility_chart.html
-│       ├── portfolio_comparison.html  ├── monte_carlo.html
-│       ├── efficient_frontier.html    ├── bist_market.html
-│       ├── economic_calendar.html     ├── market_mood.html
-│       ├── earnings_calendar.html     ├── short_squeeze.html
-│       ├── famous_investors.html      └── crisis_sim.html
+│   ├── base.html                # Navbar (3 dropdowns) · Ticker · Dark mode · Onboarding
+│   ├── accounts/                # login · register · profile
+│   └── portfolio/               # 35 templates
 │
 ├── portfoliq/
-│   ├── settings.py              # Django settings with LocMemCache
-│   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
+│   ├── settings.py              # LocMemCache config
+│   └── urls.py
 │
 ├── .gitignore
 ├── manage.py
-├── requirements.txt
-└── README.md
+└── requirements.txt
 ```
 
 ---
@@ -307,125 +266,53 @@ portfoliq/
 ## 🗺️ URL Map
 
 ```
-/                        → Landing page
-/dashboard/              → Main dashboard
-/portfolios/             → Portfolio list (search + pagination)
-/portfolios/new/         → Create portfolio
-/portfolios/<pk>/        → Portfolio detail
-/portfolios/<pk>/edit/   → Edit portfolio
-/portfolios/<pk>/delete/ → Delete portfolio
-/portfolios/<pk>/card/   → Shareable portfolio card
+Core             /dashboard/    /portfolios/    /market/    /watchlist/    /alerts/    /news/
 
-/assets/<pk>/            → Asset detail
-/assets/<pk>/delete/     → Delete asset
-/assets/<pk>/transaction/→ Add transaction
+Analytics        /intelligence/    /beta/        /volatility/    /sectors/
+                 /monte-carlo/     /efficient-frontier/    /heatmap/    /mood/
 
-/market/                 → Market overview
-/watchlist/              → Watchlist
-/alerts/                 → Price alerts
-/news/                   → Market news
+Tools            /whatif/    /regret/    /breakeven/    /dca/
+                 /dividends/    /targets/    /compare/    /crisis/
 
-/intelligence/           → Portfolio Intelligence
-/whatif/                 → What-If Simulator
-/regret/                 → Regret Calculator
-/breakeven/              → Break-Even Calculator
-/heatmap/                → Market Heatmap
-/dca/                    → DCA Planner
-/dividends/              → Dividend Tracker
-/beta/                   → Portfolio Beta
-/sectors/                → Sector Rotation
-/ipo/                    → IPO Tracker
-/insider/                → Insider Trading Feed
-/targets/                → Price Targets
-/volatility/             → Volatility Chart
-/compare/                → Portfolio Comparison
-/monte-carlo/            → Monte Carlo Simulation
-/efficient-frontier/     → Efficient Frontier
-/bist/                   → BIST Market
-/calendar/               → Economic Calendar
-/mood/                   → Market Mood Ring
-/earnings/               → Earnings Calendar
-/short-squeeze/          → Short Squeeze Detector
-/famous/                 → Famous Investors
-/crisis/                 → Crisis Simulator
+Market Intel     /ipo/    /insider/    /earnings/    /short-squeeze/    /famous/    /calendar/
 
-/export/<pk>/csv/        → CSV export
-/export/<pk>/pdf/        → PDF export
+Turkey           /bist/
 
-/ajax/ticker/            → Live ticker (JSON)
-/ajax/search/            → Asset search (JSON)
-/ajax/info/              → Asset info (JSON)
-/ajax/check-alerts/      → Triggered alerts (JSON)
-/ajax/refresh/<pk>/      → Refresh prices (JSON)
-
-/api/portfolios/         → DRF portfolios
-/api/assets/             → DRF assets
-/admin/                  → Django admin
+API              /api/portfolios/    /api/assets/    /admin/
+                 /ajax/ticker/       /ajax/search/   /ajax/check-alerts/
 ```
 
 ---
 
-## 🔌 REST API (DRF)
+## 🔌 REST API
 
 ```http
-GET  /api/portfolios/      → List user portfolios
-GET  /api/portfolios/<id>/ → Portfolio detail
-GET  /api/assets/          → List user assets
-GET  /api/assets/<id>/     → Asset detail
+GET  /api/portfolios/       →  List user portfolios
+GET  /api/portfolios/<id>/  →  Portfolio detail
+GET  /api/assets/           →  List user assets
+GET  /api/assets/<id>/      →  Asset detail
 ```
 
-All endpoints require session authentication. Returns JSON.
-
----
-
-## 🚀 Deploy on Render
-
-1. Push code to GitHub
-2. Go to [render.com](https://render.com) → New Web Service
-3. Connect your GitHub repo
-4. Set **build command:**
-   ```bash
-   pip install -r requirements.txt && python manage.py migrate
-   ```
-5. Set **start command:**
-   ```bash
-   gunicorn portfoliq.wsgi:application
-   ```
-6. Add environment variables in Render dashboard
-7. Deploy!
-
----
-
-## 📦 Key Dependencies
-
-```
-django>=6.0
-djangorestframework
-yfinance
-requests
-python-dotenv
-reportlab
-gunicorn
-whitenoise
-numpy
-pandas
-```
-
-Full list in `requirements.txt`.
+> All endpoints require session authentication · Returns JSON
 
 ---
 
 ## 📄 License
 
-MIT License — feel free to use, modify, and distribute.
+MIT License — free to use, modify, and distribute.
 
 ---
 
-## 👤 Author
+<div align="center">
 
-**Beha Doğangun**
-- GitHub: [@behadogangun](https://github.com/behadogangun)
+<br/>
 
----
+**Built with ❤️ for ACM 412 — Django & Web Technologies**
 
-> Built with ❤️ as a term project for ACM 412 — Django & Web Technologies
+<br/>
+
+[![GitHub](https://img.shields.io/badge/GitHub-behadogangun-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/behadogangun)
+
+<br/>
+
+</div>
