@@ -379,12 +379,12 @@ def asset_info(request):
     return JsonResponse(info)
 
 
+
 @login_required
 def ticker_data(request):
     """Live ticker price data."""
     from django.core.cache import cache
-    
-    cached = cache.get('ticker_data')
+    cache.delete('ticker_data')  # Cache'i zorla temizle
     if cached:
         return JsonResponse({'tickers': cached})
 
