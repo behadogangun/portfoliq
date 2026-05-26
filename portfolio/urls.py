@@ -53,4 +53,5 @@ urlpatterns = [
     path('short-squeeze/', views.short_squeeze, name='short_squeeze'),
     path('famous/', views.famous_investors, name='famous_investors'),
     path('crisis/', views.crisis_sim, name='crisis_sim'),
+    path('ajax/fetch-prices/', views.fetch_prices_cron, name='fetch_prices_cron'),
 ]

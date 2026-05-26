@@ -1376,3 +1376,38 @@ def crisis_sim(request):
         'crises': crises,
         'selected': crisis_name,
     })
+
+
+import os
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def fetch_prices_cron(request):
+    """GitHub Actions cron job trigger."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    secret = os.environ.get('FETCH_SECRET', '')
+    import json
+    try:
+        body = json.loads(request.body)
+        if body.get('secret') != secret:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+    except Exception:
+        return JsonResponse({'error': 'Invalid body'}, status=400)
+    
+    from .models import Asset, PriceHistory
+    from .services import fetch_price
+    
+    assets = Asset.objects.all()
+    updated = 0
+    for asset in assets:
+        try:
+            price = fetch_price(asset)
+            if price:
+                PriceHistory.objects.create(asset=asset, price=price)
+                updated += 1
+        except Exception:
+            continue
+    
+    return JsonResponse({'updated': updated, 'total': assets.count()})

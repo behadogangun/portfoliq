@@ -1,0 +1,16 @@
+name: Fetch Prices
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Her 10 dakika
+  workflow_dispatch:          # Manuel tetikleme
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger price fetch
+        run: |
+          curl -X POST https://portfoliq.onrender.com/ajax/fetch-prices/ \
+            -H "Content-Type: application/json" \
+            -d '{"secret": "${{ secrets.FETCH_SECRET }}"}'
