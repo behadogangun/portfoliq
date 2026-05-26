@@ -384,37 +384,28 @@ def asset_info(request):
 def ticker_data(request):
     """Live ticker price data."""
     from django.core.cache import cache
-    cached = cache.get('ticker_data')  # Cache'i zorla temizle
+    TWELVE_DATA_KEY = os.environ.get('TWELVE_DATA_KEY', '')
+    
+    cached = cache.get('ticker_data')
     if cached:
         return JsonResponse({'tickers': cached})
 
-    crypto_symbols = [
-        ('BTC', 'bitcoin'),
-        ('ETH', 'ethereum'),
-        ('BNB', 'binancecoin'),
-        ('SOL', 'solana'),
-        ('XRP', 'ripple'),
-        ('ADA', 'cardano'),
-        ('DOGE', 'dogecoin'),
-        ('AVAX', 'avalanche-2'),
-    ]
-    stock_symbols = [
-        'AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL',
-        'META', 'AMZN', 'JPM', 'BAC', 'GS',
-        'V', 'MA', 'WMT', 'XOM', 'JNJ',
-        'BRK-B', 'LLY', 'UNH', 'HD', 'PG',
-    ]
     results = []
 
     # Crypto — CoinGecko
     try:
-        ids = ','.join([s[1] for s in crypto_symbols])
+        ids = 'bitcoin,ethereum,binancecoin,solana,ripple,cardano,dogecoin,avalanche-2'
         r = requests.get(
             f'https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd&include_24hr_change=true',
             timeout=8
         )
         data = r.json()
-        for sym, coin_id in crypto_symbols:
+        mapping = {
+            'bitcoin': 'BTC', 'ethereum': 'ETH', 'binancecoin': 'BNB',
+            'solana': 'SOL', 'ripple': 'XRP', 'cardano': 'ADA',
+            'dogecoin': 'DOGE', 'avalanche-2': 'AVAX'
+        }
+        for coin_id, sym in mapping.items():
             if coin_id in data:
                 results.append({
                     'symbol': sym,
@@ -424,19 +415,18 @@ def ticker_data(request):
     except Exception:
         pass
 
-    # Stocks — Twelve Data
+    # Stocks — Twelve Data batch
     try:
-        TWELVE_DATA_KEY = os.environ.get('TWELVE_DATA_KEY', '')
+        stock_symbols = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'META', 'AMZN', 'JPM', 'V', 'WMT']
         symbols_str = ','.join(stock_symbols)
         url = f'https://api.twelvedata.com/price?symbol={symbols_str}&apikey={TWELVE_DATA_KEY}'
         r = requests.get(url, timeout=10)
         data = r.json()
         for symbol in stock_symbols:
-            if symbol in data and 'price' in data[symbol]:
-                price = float(data[symbol]['price'])
+            if symbol in data and isinstance(data[symbol], dict) and 'price' in data[symbol]:
                 results.append({
                     'symbol': symbol,
-                    'price': price,
+                    'price': float(data[symbol]['price']),
                     'change': 0,
                 })
     except Exception:
