@@ -115,21 +115,27 @@ def get_stock_info(symbol):
         return None
 
 
+FMP_KEY = os.environ.get('FMP_KEY', '')
+
 def search_stocks(query):
-    # Önce yfinance dene — daha güvenilir
+    # Financial Modeling Prep — çok daha iyi search
     try:
-        import yfinance as yf
-        ticker = yf.Ticker(query.upper())
-        info = ticker.info
-        name = info.get('longName') or info.get('shortName', '')
-        price = info.get('currentPrice') or info.get('regularMarketPrice') or 0
-        if name and price:
-            return [{
-                'symbol': query.upper(),
+        url = f'https://financialmodelingprep.com/api/v3/search?query={query}&limit=8&exchange=NASDAQ,NYSE&apikey={FMP_KEY}'
+        r = requests.get(url, timeout=6)
+        data = r.json()
+        results = []
+        for item in data:
+            symbol = item.get('symbol', '')
+            name = item.get('name', '')
+            if not symbol or not name:
+                continue
+            results.append({
+                'symbol': symbol,
                 'name': name,
-                'logo': f'https://financialmodelingprep.com/image-stock/{query.upper()}.png',
+                'logo': f'https://financialmodelingprep.com/image-stock/{symbol}.png',
                 'type': 'stock',
-            }]
+            })
+        return results[:6]
     except Exception:
         pass
 
@@ -140,6 +146,28 @@ def search_stocks(query):
             f'?function=SYMBOL_SEARCH&keywords={query}&apikey={ALPHA_VANTAGE_KEY}'
         )
         r = requests.get(url, timeout=5)
+        matches = r.json().get('bestMatches', [])[:5]
+        results = []
+        for m in matches:
+            if m.get('4. region') == 'United States':
+                symbol = m['1. symbol']
+                results.append({
+                    'symbol': symbol,
+                    'name': m['2. name'],
+                    'logo': f'https://financialmodelingprep.com/image-stock/{symbol}.png',
+                    'type': 'stock',
+                })
+        return results
+    except Exception:
+        return []
+
+    # Fallback: Alpha Vantage
+    try:
+        url = (
+            f'https://www.alphavantage.co/query'
+            f'?function=SYMBOL_SEARCH&keywords={query}&apikey={ALPHA_VANTAGE_KEY}'
+        )
+        r = requests.get(url, timeout=8)
         matches = r.json().get('bestMatches', [])[:5]
         results = []
         for m in matches:
