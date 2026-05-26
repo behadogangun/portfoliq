@@ -6,13 +6,35 @@
     <div class="pq-page-title mb-1">Add Asset</div>
     <div class="pq-page-sub mb-4">{{ portfolio.name }}</div>
 
+    <!-- Type Filter -->
+    <div class="pq-card p-4 mb-3">
+        <label style="font-size:13px;font-weight:500;display:block;margin-bottom:10px;">Asset Type</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="typeFilter">
+            <button type="button" onclick="setType('all')" id="btn-all"
+                class="type-btn active"
+                style="padding:7px 16px;border-radius:980px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;background:#0071e3;color:white;">
+                All
+            </button>
+            <button type="button" onclick="setType('stock')" id="btn-stock"
+                class="type-btn"
+                style="padding:7px 16px;border-radius:980px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;background:rgba(0,0,0,0.05);color:#1d1d1f;">
+                📈 Stocks
+            </button>
+            <button type="button" onclick="setType('crypto')" id="btn-crypto"
+                class="type-btn"
+                style="padding:7px 16px;border-radius:980px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;background:rgba(0,0,0,0.05);color:#1d1d1f;">
+                🪙 Crypto
+            </button>
+        </div>
+    </div>
+
     <!-- Search -->
     <div class="pq-card p-4 mb-3">
         <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Search asset</label>
         <input type="text" id="searchInput" class="pq-input" placeholder="Search AAPL, BTC, ETH..." autocomplete="off">
     </div>
 
-    <!-- Dropdown portal -->
+    <!-- Dropdown -->
     <div id="searchResults" style="
         display:none;
         background:#fff;
@@ -74,9 +96,31 @@
 {% block scripts %}
 <script>
     let selectedAsset = null;
+    let activeType = 'all';
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
     let debounceTimer;
+
+    function setType(type) {
+        activeType = type;
+        // Button styles
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.style.background = 'rgba(0,0,0,0.05)';
+            btn.style.color = '#1d1d1f';
+        });
+        const active = document.getElementById('btn-' + type);
+        if (active) {
+            active.style.background = '#0071e3';
+            active.style.color = 'white';
+        }
+        // Update placeholder
+        if (type === 'stock') searchInput.placeholder = 'Search AAPL, TSLA, NVDA...';
+        else if (type === 'crypto') searchInput.placeholder = 'Search BTC, ETH, SOL...';
+        else searchInput.placeholder = 'Search AAPL, BTC, ETH...';
+        // Re-search if there's a query
+        const q = searchInput.value.trim();
+        if (q.length >= 1) fetchResults(q);
+    }
 
     searchInput.addEventListener('input', () => {
         clearTimeout(debounceTimer);
@@ -86,13 +130,29 @@
     });
 
     function fetchResults(q) {
-        fetch(`{% url 'asset_search' %}?q=${encodeURIComponent(q)}`)
+        fetch(`{% url 'asset_search' %}?q=${encodeURIComponent(q)}&type=${activeType}`)
             .then(r => r.json())
-            .then(data => renderResults(data.results));
+            .then(data => {
+                let results = data.results;
+                // Client-side filter by type
+                if (activeType === 'stock') {
+                    results = results.filter(r => r.type === 'stock');
+                } else if (activeType === 'crypto') {
+                    results = results.filter(r => r.type === 'crypto');
+                }
+                renderResults(results);
+            });
     }
 
     function renderResults(results) {
-        if (!results.length) { searchResults.style.display = 'none'; return; }
+        if (!results.length) {
+            searchResults.innerHTML = `
+                <div style="padding:16px;text-align:center;color:#6e6e73;font-size:13px;">
+                    No results found. Try a different search.
+                </div>`;
+            searchResults.style.display = 'block';
+            return;
+        }
         searchResults.innerHTML = results.map(r => `
             <div onclick='selectAsset(${JSON.stringify(r)})'
                  style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid rgba(0,0,0,0.04);"
@@ -106,7 +166,10 @@
                     <div style="font-size:14px;font-weight:600;color:#1d1d1f;">${r.symbol}</div>
                     <div style="font-size:12px;color:#6e6e73;">${r.name}</div>
                 </div>
-                <span style="font-size:11px;padding:3px 9px;border-radius:980px;background:${r.type === 'crypto' ? 'rgba(255,149,0,0.1)' : 'rgba(0,113,227,0.1)'};color:${r.type === 'crypto' ? '#b36200' : '#0071e3'};font-weight:500;">${r.type}</span>
+                <span style="font-size:11px;padding:3px 9px;border-radius:980px;
+                    background:${r.type === 'crypto' ? 'rgba(255,149,0,0.1)' : 'rgba(0,113,227,0.1)'};
+                    color:${r.type === 'crypto' ? '#b36200' : '#0071e3'};
+                    font-weight:500;">${r.type}</span>
             </div>
         `).join('');
         searchResults.style.display = 'block';
