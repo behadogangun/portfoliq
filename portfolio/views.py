@@ -382,17 +382,14 @@ def asset_info(request):
 
 @login_required
 def ticker_data(request):
-    """Live ticker price data."""
     from django.core.cache import cache
-    TWELVE_DATA_KEY = os.environ.get('TWELVE_DATA_KEY', '')
+    import logging
+    logger = logging.getLogger(__name__)
     
-    cached = cache.get('ticker_data')
-    if cached:
-        return JsonResponse({'tickers': cached})
-
+    TWELVE_DATA_KEY = os.environ.get('TWELVE_DATA_KEY', '')
     results = []
 
-    # Crypto — CoinGecko
+    # Crypto
     try:
         ids = 'bitcoin,ethereum,binancecoin,solana,ripple,cardano,dogecoin,avalanche-2'
         r = requests.get(
@@ -412,16 +409,18 @@ def ticker_data(request):
                     'price': data[coin_id]['usd'],
                     'change': round(data[coin_id].get('usd_24h_change', 0), 2),
                 })
-    except Exception:
-        pass
+        logger.error(f'CRYPTO OK: {len(results)} items, data keys: {list(data.keys())[:3]}')
+    except Exception as e:
+        logger.error(f'CRYPTO ERROR: {e}')
 
-    # Stocks — Twelve Data batch
+    # Stocks
     try:
-        stock_symbols = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'META', 'AMZN', 'JPM', 'V', 'WMT']
+        stock_symbols = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL']
         symbols_str = ','.join(stock_symbols)
         url = f'https://api.twelvedata.com/price?symbol={symbols_str}&apikey={TWELVE_DATA_KEY}'
         r = requests.get(url, timeout=10)
         data = r.json()
+        logger.error(f'STOCKS RAW: {str(data)[:200]}')
         for symbol in stock_symbols:
             if symbol in data and isinstance(data[symbol], dict) and 'price' in data[symbol]:
                 results.append({
@@ -429,9 +428,10 @@ def ticker_data(request):
                     'price': float(data[symbol]['price']),
                     'change': 0,
                 })
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f'STOCKS ERROR: {e}')
 
+    logger.error(f'TICKER TOTAL: {len(results)} results')
     cache.set('ticker_data', results, 120)
     return JsonResponse({'tickers': results})
 
