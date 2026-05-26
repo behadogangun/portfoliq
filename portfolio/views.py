@@ -45,7 +45,8 @@ from .services import (
 
 @login_required
 def dashboard(request):
-    show_onboarding = not request.session.get('onboarding_done', False)
+    has_portfolios = Portfolio.objects.filter(user=request.user).exists()
+    show_onboarding = not request.session.get('onboarding_done', False) and not has_portfolios
     portfolios = Portfolio.objects.filter(
         user=request.user
     ).prefetch_related(
