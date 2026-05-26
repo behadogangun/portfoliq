@@ -118,16 +118,19 @@ def get_stock_info(symbol):
 FMP_KEY = os.environ.get('FMP_KEY', '')
 
 def search_stocks(query):
-    # Financial Modeling Prep — çok daha iyi search
+    # FMP yeni endpoint
     try:
-        url = f'https://financialmodelingprep.com/api/v3/search?query={query}&limit=8&exchange=NASDAQ,NYSE&apikey={FMP_KEY}'
+        url = f'https://financialmodelingprep.com/stable/search-symbol?query={query}&apikey={FMP_KEY}'
         r = requests.get(url, timeout=6)
         data = r.json()
         results = []
-        for item in data:
+        for item in data[:6]:
             symbol = item.get('symbol', '')
-            name = item.get('name', '')
+            name = item.get('name', '') or item.get('companyName', '')
+            exchange = item.get('exchangeShortName', '') or item.get('exchange', '')
             if not symbol or not name:
+                continue
+            if exchange not in ['NASDAQ', 'NYSE', 'NYSE ARCA', 'AMEX']:
                 continue
             results.append({
                 'symbol': symbol,
@@ -135,7 +138,8 @@ def search_stocks(query):
                 'logo': f'https://financialmodelingprep.com/image-stock/{symbol}.png',
                 'type': 'stock',
             })
-        return results[:6]
+        if results:
+            return results
     except Exception:
         pass
 
