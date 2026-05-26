@@ -361,9 +361,19 @@ def asset_info(request):
     asset_type = request.GET.get('type', '').strip()
     if not symbol or not asset_type:
         return JsonResponse({'error': 'Missing parameters'}, status=400)
+    
+    # Cache'den kontrol et
+    from django.core.cache import cache
+    cache_key = f'asset_info_{symbol}_{asset_type}'
+    cached = cache.get(cache_key)
+    if cached:
+        return JsonResponse(cached)
+    
     info = fetch_asset_info(symbol, asset_type)
     if not info:
         return JsonResponse({'error': 'Not found'}, status=404)
+    
+    cache.set(cache_key, info, 60)
     return JsonResponse(info)
 
 

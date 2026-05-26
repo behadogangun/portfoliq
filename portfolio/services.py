@@ -91,10 +91,9 @@ def get_stock_info(symbol):
     if cached:
         return cached
     try:
+        import yfinance as yf
         ticker = yf.Ticker(symbol)
         info = ticker.info
-        hist = ticker.history(period='7d')
-        sparkline = hist['Close'].tolist() if not hist.empty else []
         price = info.get('currentPrice') or info.get('regularMarketPrice') or 0
         prev_close = info.get('previousClose') or price
         change_24h = ((price - prev_close) / prev_close * 100) if prev_close else 0
@@ -107,7 +106,7 @@ def get_stock_info(symbol):
             'market_cap': info.get('marketCap', 0),
             'volume_24h': info.get('volume', 0),
             'sector': info.get('sector', ''),
-            'sparkline': sparkline,
+            'sparkline': [],
         }
         cache.set(cache_key, result, 60)
         return result
