@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Add Transaction — PortfoliQ{% endblock %}
+
+{% block content %}
+<div style="max-width:520px;margin:0 auto;padding:40px 24px;">
+    <div class="pq-page-title mb-1">Add Transaction</div>
+    <div class="pq-page-sub mb-4">{{ asset.symbol }} — {{ asset.name }}</div>
+
+    <div class="pq-card p-4">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}
+                <div style="font-size:12px;color:#c4162a;margin-top:4px;">{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            <div style="display:flex;gap:8px;margin-top:8px;">
+                <button type="submit" class="btn-apple" style="padding:10px 20px;">Save</button>
+                <a href="{% url 'asset_detail' asset.pk %}" class="btn-apple-secondary" style="padding:10px 20px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

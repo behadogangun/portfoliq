@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Economic Calendar — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:1000px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Economic Calendar</div>
+    <div class="pq-page-sub mb-4">Upcoming economic events and their market impact</div>
+
+    <!-- Filter -->
+    <div class="pq-card p-4 mb-4">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:500;color:#6e6e73;">Filter by impact:</span>
+            <a href="?impact=all" class="{% if impact_filter == 'all' %}btn-apple{% else %}btn-apple-secondary{% endif %}" style="padding:6px 14px;font-size:13px;">All</a>
+            <a href="?impact=high" style="padding:6px 14px;font-size:13px;border-radius:980px;font-weight:500;text-decoration:none;
+                background:{% if impact_filter == 'high' %}rgba(196,22,42,1){% else %}rgba(196,22,42,0.08){% endif %};
+                color:{% if impact_filter == 'high' %}white{% else %}#c4162a{% endif %};">
+                🔴 High Impact
+            </a>
+            <a href="?impact=medium" style="padding:6px 14px;font-size:13px;border-radius:980px;font-weight:500;text-decoration:none;
+                background:{% if impact_filter == 'medium' %}rgba(255,149,0,1){% else %}rgba(255,149,0,0.08){% endif %};
+                color:{% if impact_filter == 'medium' %}white{% else %}#ff9500{% endif %};">
+                🟡 Medium Impact
+            </a>
+            <a href="?impact=low" style="padding:6px 14px;font-size:13px;border-radius:980px;font-weight:500;text-decoration:none;
+                background:{% if impact_filter == 'low' %}rgba(110,110,115,1){% else %}rgba(110,110,115,0.08){% endif %};
+                color:{% if impact_filter == 'low' %}white{% else %}#6e6e73{% endif %};">
+                ⚪ Low Impact
+            </a>
+        </div>
+    </div>
+
+    {% if events %}
+    <div class="pq-card">
+        <div style="padding:20px 20px 0;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div style="font-size:16px;font-weight:600;">Upcoming Events</div>
+            <div style="font-size:12px;color:#6e6e73;">Next 30 days</div>
+        </div>
+        <table class="pq-table" style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Event</th>
+                    <th>Country</th>
+                    <th style="text-align:center;">Impact</th>
+                    <th style="text-align:right;">Actual</th>
+                    <th style="text-align:right;">Estimate</th>
+                    <th style="text-align:right;">Previous</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td style="font-size:13px;color:#6e6e73;white-space:nowrap;">{{ event.date }}</td>
+                    <td style="font-weight:500;">{{ event.event }}</td>
+                    <td>
+    <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:20px;">{{ event.flag }}</span>
+        <span style="font-size:12px;font-weight:600;color:#6e6e73;">{{ event.country }}</span>
+    </div>
+</td>
+                    <td style="text-align:center;">
+                        <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:980px;
+                            background:{{ event.impact_color }}18;color:{{ event.impact_color }};">
+                            {{ event.impact|title }}
+                        </span>
+                    </td>
+                    <td style="text-align:right;font-weight:600;font-size:13px;">
+                        {% if event.actual %}{{ event.actual }}{% else %}<span style="color:#c7c7cc;">—</span>{% endif %}
+                    </td>
+                    <td style="text-align:right;font-size:13px;color:#6e6e73;">
+                        {% if event.estimate %}{{ event.estimate }}{% else %}<span style="color:#c7c7cc;">—</span>{% endif %}
+                    </td>
+                    <td style="text-align:right;font-size:13px;color:#6e6e73;">
+                        {% if event.prev %}{{ event.prev }}{% else %}<span style="color:#c7c7cc;">—</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-calendar-x" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;">No events found</div>
+        <div style="font-size:14px;color:#6e6e73;margin-top:8px;">Try a different filter.</div>
+    </div>
+    {% endif %}
+
+    <!-- Legend -->
+    <div class="pq-card p-4 mt-4" style="background:rgba(0,113,227,0.03);border-left:3px solid #0071e3;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:12px;">💡 How to read the calendar</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+            <div>
+                <div style="font-size:13px;font-weight:600;color:#c4162a;margin-bottom:4px;">🔴 High Impact</div>
+                <div style="font-size:13px;color:#6e6e73;">Fed decisions, NFP, CPI — can move markets significantly.</div>
+            </div>
+            <div>
+                <div style="font-size:13px;font-weight:600;color:#ff9500;margin-bottom:4px;">🟡 Medium Impact</div>
+                <div style="font-size:13px;color:#6e6e73;">Retail sales, PMI, consumer confidence — moderate market effect.</div>
+            </div>
+            <div>
+                <div style="font-size:13px;font-weight:600;color:#6e6e73;margin-bottom:4px;">⚪ Low Impact</div>
+                <div style="font-size:13px;color:#6e6e73;">Minor data releases — usually limited market reaction.</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

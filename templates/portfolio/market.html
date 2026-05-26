@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Market — PortfoliQ{% endblock %}
+{% load filters %}
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;padding:40px 24px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="pq-page-title">Market</div>
+            <div class="pq-page-sub">Live prices and market data</div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:24px;">
+        <a href="?tab=crypto"
+           style="padding:8px 20px;border-radius:980px;font-size:14px;font-weight:500;text-decoration:none;
+           {% if tab == 'crypto' %}background:#0071e3;color:#fff;{% else %}background:rgba(0,0,0,0.05);color:#6e6e73;{% endif %}">
+            Crypto
+        </a>
+        <a href="?tab=stocks"
+           style="padding:8px 20px;border-radius:980px;font-size:14px;font-weight:500;text-decoration:none;
+           {% if tab == 'stocks' %}background:#0071e3;color:#fff;{% else %}background:rgba(0,0,0,0.05);color:#6e6e73;{% endif %}">
+            Stocks
+        </a>
+    </div>
+
+    <div class="pq-card">
+        <table class="pq-table" style="width:100%;">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Name</th>
+                    <th style="text-align:right;">Price</th>
+                    <th style="text-align:right;">24h %</th>
+                    <th style="text-align:right;">Market Cap</th>
+                    <th style="text-align:right;">Volume (24h)</th>
+                    {% if tab == 'crypto' %}<th style="text-align:right;width:120px;">7D</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if tab == 'crypto' %}
+                    {% for coin in cryptos %}
+                    <tr>
+                        <td style="color:#6e6e73;font-size:13px;">{{ forloop.counter }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <img src="{{ coin.image }}" style="width:32px;height:32px;border-radius:50%;" onerror="this.style.display='none'">
+                                <div>
+                                    <div style="font-size:14px;font-weight:600;">{{ coin.name }}</div>
+                                    <div style="font-size:12px;color:#6e6e73;">{{ coin.symbol|upper }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="text-align:right;font-size:14px;font-weight:600;">${{ coin.current_price|floatformat:2 }}</td>
+                        <td style="text-align:right;">
+                            {% if coin.price_change_percentage_24h >= 0 %}
+                            <span style="color:#1c7f3e;font-size:13px;font-weight:500;">+{{ coin.price_change_percentage_24h|floatformat:2 }}%</span>
+                            {% else %}
+                            <span style="color:#c4162a;font-size:13px;font-weight:500;">{{ coin.price_change_percentage_24h|floatformat:2 }}%</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:right;font-size:13px;color:#6e6e73;">{{ coin.market_cap|format_number }}</td>
+                        <td style="text-align:right;font-size:13px;color:#6e6e73;">{{ coin.total_volume|format_number }}</td>
+                        <td style="text-align:right;">
+                            <canvas class="spark-canvas" width="120" height="40"
+                                    data-positive="{% if coin.price_change_percentage_24h >= 0 %}1{% else %}0{% endif %}"
+                                    data-spark="{{ coin.sparkline_in_7d.price|join:',' }}">
+                            </canvas>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" style="text-align:center;padding:40px;color:#6e6e73;">No data available.</td></tr>
+                    {% endfor %}
+
+                {% else %}
+                    {% for stock in stocks %}
+                    <tr>
+                        <td style="color:#6e6e73;font-size:13px;">{{ forloop.counter }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <img src="{{ stock.image }}" style="width:32px;height:32px;border-radius:8px;background:#f5f5f7;padding:3px;object-fit:contain;" onerror="this.style.display='none'">
+                                <div>
+                                    <div style="font-size:14px;font-weight:600;">{{ stock.symbol }}</div>
+                                    <div style="font-size:12px;color:#6e6e73;">{{ stock.name }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="text-align:right;font-size:14px;font-weight:600;">${{ stock.current_price|floatformat:2 }}</td>
+                        <td style="text-align:right;">
+                            {% if stock.price_change_percentage_24h >= 0 %}
+                            <span style="color:#1c7f3e;font-size:13px;font-weight:500;">+{{ stock.price_change_percentage_24h|floatformat:2 }}%</span>
+                            {% else %}
+                            <span style="color:#c4162a;font-size:13px;font-weight:500;">{{ stock.price_change_percentage_24h|floatformat:2 }}%</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:right;font-size:13px;color:#6e6e73;">{{ stock.market_cap|format_number }}</td>
+                        <td style="text-align:right;font-size:13px;color:#6e6e73;">{{ stock.total_volume|format_number }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" style="text-align:center;padding:40px;color:#6e6e73;">No data available.</td></tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.querySelectorAll('.spark-canvas').forEach(canvas => {
+    const raw = canvas.dataset.spark;
+    if (!raw || raw.trim() === '') return;
+    const prices = raw.split(',').map(Number).filter(n => !isNaN(n));
+    if (prices.length < 2) return;
+    const positive = canvas.dataset.positive === '1';
+    const color = positive ? '#1c7f3e' : '#c4162a';
+    const bg = positive ? 'rgba(28,127,62,0.08)' : 'rgba(196,22,42,0.08)';
+    new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: prices.map((_, i) => i),
+            datasets: [{
+                data: prices,
+                borderColor: color,
+                borderWidth: 1.5,
+                pointRadius: 0,
+                tension: 0.4,
+                fill: true,
+                backgroundColor: bg,
+            }]
+        },
+        options: {
+            responsive: false,
+            animation: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { x: { display: false }, y: { display: false } },
+        }
+    });
+});
+</script>
+{% endblock %}

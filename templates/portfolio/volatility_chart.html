@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Volatility Chart — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:900px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Portfolio Volatility</div>
+    <div class="pq-page-sub mb-4">10-day rolling annualized volatility of your portfolio over the last 3 months</div>
+
+    {% if vol_data %}
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid {{ vol_data.vol_color }};">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Current Vol</div>
+                <div style="font-size:24px;font-weight:700;color:{{ vol_data.vol_color }};">{{ vol_data.current_vol }}%</div>
+                <div style="font-size:12px;color:{{ vol_data.vol_color }};margin-top:4px;">{{ vol_data.vol_label }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #0071e3;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Average</div>
+                <div style="font-size:24px;font-weight:700;">{{ vol_data.avg_vol }}%</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">3-month avg</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #c4162a;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Peak</div>
+                <div style="font-size:24px;font-weight:700;color:#c4162a;">{{ vol_data.max_vol }}%</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">highest</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #1c7f3e;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Trough</div>
+                <div style="font-size:24px;font-weight:700;color:#1c7f3e;">{{ vol_data.min_vol }}%</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">lowest</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Rolling 10-Day Volatility</div>
+        <div style="font-size:13px;color:#6e6e73;margin-bottom:20px;">Annualized — lower is more stable</div>
+        <canvas id="volChart" height="80"></canvas>
+    </div>
+
+    <!-- Volatility Scale -->
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Volatility Scale</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+            <div style="text-align:center;padding:12px;border-radius:12px;background:rgba(28,127,62,0.06);border:1px solid rgba(28,127,62,0.15);">
+                <div style="font-size:18px;font-weight:700;color:#1c7f3e;">< 15%</div>
+                <div style="font-size:13px;font-weight:600;color:#1c7f3e;margin-top:4px;">Low</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">Stable, bond-like</div>
+            </div>
+            <div style="text-align:center;padding:12px;border-radius:12px;background:rgba(0,113,227,0.06);border:1px solid rgba(0,113,227,0.15);">
+                <div style="font-size:18px;font-weight:700;color:#0071e3;">15–25%</div>
+                <div style="font-size:13px;font-weight:600;color:#0071e3;margin-top:4px;">Moderate</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">Typical stock portfolio</div>
+            </div>
+            <div style="text-align:center;padding:12px;border-radius:12px;background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);">
+                <div style="font-size:18px;font-weight:700;color:#ff9500;">25–40%</div>
+                <div style="font-size:13px;font-weight:600;color:#ff9500;margin-top:4px;">High</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">Growth/tech heavy</div>
+            </div>
+            <div style="text-align:center;padding:12px;border-radius:12px;background:rgba(196,22,42,0.06);border:1px solid rgba(196,22,42,0.15);">
+                <div style="font-size:18px;font-weight:700;color:#c4162a;">> 40%</div>
+                <div style="font-size:13px;font-weight:600;color:#c4162a;margin-top:4px;">Very High</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">Crypto-heavy</div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-graph-up" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;">Not enough data</div>
+        <div style="font-size:14px;color:#6e6e73;">Add stock holdings with price history to calculate volatility.</div>
+        <a href="{% url 'portfolio_list' %}" class="btn-apple" style="margin-top:16px;">View Portfolios</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if vol_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+window.addEventListener('load', function() {
+    const canvas = document.getElementById('volChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const labels = {{ vol_data.labels|safe }};
+    const values = {{ vol_data.values|safe }};
+    const avgVol = {{ vol_data.avg_vol }};
+    const volColor = '{{ vol_data.vol_color }}';
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Volatility (%)',
+                    data: values,
+                    borderColor: volColor,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(255,149,0,0.08)',
+                },
+                {
+                    label: 'Average',
+                    data: new Array(labels.length).fill(avgVol),
+                    borderColor: '#6e6e73',
+                    borderWidth: 1.5,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top', labels: { font: { size: 12 }, usePointStyle: true } },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } },
+                y: {
+                    grid: { color: 'rgba(0,0,0,0.04)' },
+                    ticks: {
+                        callback: function(val) { return val + '%'; }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

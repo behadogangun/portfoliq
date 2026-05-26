@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}IPO Tracker — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:1000px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">IPO Tracker</div>
+    <div class="pq-page-sub mb-4">Upcoming and recent initial public offerings</div>
+
+    <!-- Upcoming IPOs -->
+    <div class="pq-card mb-4">
+        <div style="padding:20px 20px 0;display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#34c759;animation:pulse-dot 1.5s infinite;"></div>
+            <div style="font-size:16px;font-weight:600;">Upcoming IPOs</div>
+        </div>
+        {% if ipo_data.upcoming %}
+        <table class="pq-table" style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Symbol</th>
+                    <th>Exchange</th>
+                    <th style="text-align:right;">Price Range</th>
+                    <th style="text-align:right;">Expected Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ipo in ipo_data.upcoming %}
+                <tr>
+                    <td style="font-weight:600;">{{ ipo.name }}</td>
+                    <td>
+                        <span style="font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(88,86,214,0.08);color:#5856d6;">
+                            {{ ipo.symbol }}
+                        </span>
+                    </td>
+                    <td style="font-size:13px;color:#6e6e73;">{{ ipo.exchange }}</td>
+                    <td style="text-align:right;font-weight:500;">{{ ipo.price_range }}</td>
+                    <td style="text-align:right;font-size:13px;color:#6e6e73;">{{ ipo.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="padding:32px;text-align:center;color:#6e6e73;">
+            <i class="bi bi-calendar-x" style="font-size:32px;display:block;margin-bottom:12px;"></i>
+            No upcoming IPOs found this week.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent IPOs -->
+    <div class="pq-card">
+        <div style="padding:20px 20px 0;margin-bottom:4px;">
+            <div style="font-size:16px;font-weight:600;">Recent IPOs</div>
+            <div style="font-size:13px;color:#6e6e73;margin-top:2px;">Companies that recently went public</div>
+        </div>
+        {% if ipo_data.recent %}
+        <table class="pq-table" style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Symbol</th>
+                    <th>Exchange</th>
+                    <th style="text-align:right;">IPO Price</th>
+                    <th style="text-align:right;">Priced Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ipo in ipo_data.recent %}
+                <tr>
+                    <td style="font-weight:600;">{{ ipo.name }}</td>
+                    <td>
+                        <span style="font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(0,113,227,0.08);color:#0071e3;">
+                            {{ ipo.symbol }}
+                        </span>
+                    </td>
+                    <td style="font-size:13px;color:#6e6e73;">{{ ipo.exchange }}</td>
+                    <td style="text-align:right;font-weight:500;">{{ ipo.price }}</td>
+                    <td style="text-align:right;font-size:13px;color:#6e6e73;">{{ ipo.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="padding:32px;text-align:center;color:#6e6e73;">
+            No recent IPO data available.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Info -->
+    <div class="pq-card p-4 mt-4" style="background:rgba(0,113,227,0.03);border-left:3px solid #0071e3;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px;">💡 What is an IPO?</div>
+        <div style="font-size:14px;color:#6e6e73;line-height:1.6;">
+            An Initial Public Offering (IPO) is when a private company first sells shares to the public.
+            IPOs can be high-risk, high-reward opportunities. Research thoroughly before investing —
+            many IPOs underperform in the first year while others become multi-baggers.
+            Data sourced from NASDAQ IPO calendar.
+        </div>
+    </div>
+
+</div>
+{% endblock %}

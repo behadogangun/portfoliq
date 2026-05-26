@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Portfolio Intelligence — PortfoliQ{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;padding:40px 24px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="pq-page-title">Portfolio Intelligence</div>
+            <div class="pq-page-sub">AI-powered insights and recommendations</div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <!-- Health Score -->
+        {% if health %}
+        <div class="col-md-4">
+            <div class="pq-card p-4 h-100 text-center">
+                <div style="font-size:15px;font-weight:600;margin-bottom:20px;">Portfolio Health Score</div>
+                <div style="position:relative;display:inline-block;margin-bottom:16px;">
+                    <svg width="160" height="160" viewBox="0 0 160 160">
+                        <circle cx="80" cy="80" r="64" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="12"/>
+                        <circle cx="80" cy="80" r="64" fill="none"
+                            stroke="{{ health.grade_color }}" stroke-width="12"
+                            stroke-dasharray="{{ health.score|floatformat:0 }} 400"
+                            stroke-linecap="round"
+                            transform="rotate(-90 80 80)"
+                            style="transition:stroke-dasharray 1s ease;"/>
+                        <text x="80" y="72" text-anchor="middle" font-size="40" font-weight="700" fill="{{ health.grade_color }}">{{ health.grade }}</text>
+                        <text x="80" y="95" text-anchor="middle" font-size="16" fill="#6e6e73">{{ health.score }}/100</text>
+                        <text x="80" y="115" text-anchor="middle" font-size="12" fill="#6e6e73">{{ health.grade_desc }}</text>
+                    </svg>
+                </div>
+                {% for detail in health.details %}
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);text-align:left;">
+                    <div>
+                        <div style="font-size:13px;font-weight:500;">{{ detail.label }}</div>
+                        <div style="font-size:11px;color:#6e6e73;">{{ detail.desc }}</div>
+                    </div>
+                    <div style="font-size:14px;font-weight:700;color:{{ detail.color }};white-space:nowrap;margin-left:12px;">
+                        {{ detail.score }}/{{ detail.max }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Fear & Greed -->
+        <div class="col-md-4">
+            <div class="pq-card p-4 h-100">
+                <div style="font-size:15px;font-weight:600;margin-bottom:20px;">Crypto Fear & Greed Index</div>
+                {% with fg=fear_greed %}
+                {% if fg.value <= 25 %}
+                    {% with color="#c4162a" emoji="😱" %}
+                    <div style="text-align:center;margin-bottom:20px;">
+                        <div style="font-size:56px;margin-bottom:8px;">{{ emoji }}</div>
+                        <div style="font-size:56px;font-weight:700;color:{{ color }};letter-spacing:-2px;">{{ fg.value }}</div>
+                        <div style="font-size:18px;font-weight:600;color:{{ color }};">{{ fg.classification }}</div>
+                    </div>
+                    {% endwith %}
+                {% elif fg.value <= 45 %}
+                    {% with color="#ff9500" emoji="😰" %}
+                    <div style="text-align:center;margin-bottom:20px;">
+                        <div style="font-size:56px;margin-bottom:8px;">{{ emoji }}</div>
+                        <div style="font-size:56px;font-weight:700;color:{{ color }};letter-spacing:-2px;">{{ fg.value }}</div>
+                        <div style="font-size:18px;font-weight:600;color:{{ color }};">{{ fg.classification }}</div>
+                    </div>
+                    {% endwith %}
+                {% elif fg.value <= 55 %}
+                    {% with color="#6e6e73" emoji="😐" %}
+                    <div style="text-align:center;margin-bottom:20px;">
+                        <div style="font-size:56px;margin-bottom:8px;">{{ emoji }}</div>
+                        <div style="font-size:56px;font-weight:700;color:{{ color }};letter-spacing:-2px;">{{ fg.value }}</div>
+                        <div style="font-size:18px;font-weight:600;color:{{ color }};">{{ fg.classification }}</div>
+                    </div>
+                    {% endwith %}
+                {% elif fg.value <= 75 %}
+                    {% with color="#0071e3" emoji="😊" %}
+                    <div style="text-align:center;margin-bottom:20px;">
+                        <div style="font-size:56px;margin-bottom:8px;">{{ emoji }}</div>
+                        <div style="font-size:56px;font-weight:700;color:{{ color }};letter-spacing:-2px;">{{ fg.value }}</div>
+                        <div style="font-size:18px;font-weight:600;color:{{ color }};">{{ fg.classification }}</div>
+                    </div>
+                    {% endwith %}
+                {% else %}
+                    {% with color="#1c7f3e" emoji="🤑" %}
+                    <div style="text-align:center;margin-bottom:20px;">
+                        <div style="font-size:56px;margin-bottom:8px;">{{ emoji }}</div>
+                        <div style="font-size:56px;font-weight:700;color:{{ color }};letter-spacing:-2px;">{{ fg.value }}</div>
+                        <div style="font-size:18px;font-weight:600;color:{{ color }};">{{ fg.classification }}</div>
+                    </div>
+                    {% endwith %}
+                {% endif %}
+                {% endwith %}
+
+                <div style="background:linear-gradient(to right,#c4162a,#ff9500,#ffcc00,#0071e3,#1c7f3e);border-radius:8px;height:8px;margin-bottom:8px;position:relative;">
+                    <div style="position:absolute;top:-4px;width:16px;height:16px;background:#1d1d1f;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);left:calc({{ fear_greed.value }}% - 8px);transition:left 0.5s;"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#6e6e73;margin-bottom:20px;">
+                    <span>Extreme Fear</span><span>Neutral</span><span>Extreme Greed</span>
+                </div>
+                <div style="background:rgba(0,0,0,0.03);border-radius:12px;padding:14px;">
+                    <div style="font-size:13px;color:#6e6e73;line-height:1.6;">
+                        {% if fear_greed.value <= 25 %}Extreme fear can be a buying opportunity. Markets are overly pessimistic.
+                        {% elif fear_greed.value <= 45 %}Fear in the market. Investors are cautious — could signal undervaluation.
+                        {% elif fear_greed.value <= 55 %}Market sentiment is neutral. No strong signals either way.
+                        {% elif fear_greed.value <= 75 %}Greed is driving the market. Consider taking some profits.
+                        {% else %}Extreme greed. Markets may be overvalued — high caution advised.{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Smart Rebalancing -->
+        <div class="col-md-4">
+            <div class="pq-card p-4 h-100">
+                <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Smart Rebalancing</div>
+                <div style="font-size:13px;color:#6e6e73;margin-bottom:20px;">Suggested target: 50% stocks · 30% crypto · 10% gold</div>
+                {% if rebalancing %}
+                {% for item in rebalancing %}
+                <div style="padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <div style="font-size:14px;font-weight:600;">{{ item.type }}</div>
+                        <span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:980px;
+                            background:{% if item.action == 'Buy' %}rgba(28,127,62,0.1){% else %}rgba(196,22,42,0.1){% endif %};
+                            color:{{ item.action_color }};">{{ item.action }}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        <div style="flex:1;background:rgba(0,0,0,0.06);border-radius:4px;height:6px;overflow:hidden;">
+                            <div style="height:100%;background:#6e6e73;border-radius:4px;width:{{ item.current_pct }}%;"></div>
+                        </div>
+                        <span style="font-size:12px;color:#6e6e73;white-space:nowrap;">{{ item.current_pct }}% → {{ item.target_pct }}%</span>
+                    </div>
+                    <div style="font-size:12px;color:{{ item.action_color }};">
+                        {% if item.diff > 0 %}+{% endif %}${{ item.diff|floatformat:2 }} adjustment needed
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div style="text-align:center;padding:40px 0;color:#6e6e73;">
+                    <i class="bi bi-check-circle" style="font-size:36px;color:#1c7f3e;display:block;margin-bottom:12px;"></i>
+                    <div style="font-size:14px;font-weight:600;color:#1c7f3e;">Portfolio is well balanced!</div>
+                    <div style="font-size:13px;margin-top:4px;">No major rebalancing needed.</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Correlation Matrix -->
+    {% if correlation %}
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Correlation Matrix</div>
+        <div style="font-size:13px;color:#6e6e73;margin-bottom:20px;">
+            How your assets move together. +1 = highly correlated, 0 = no correlation, -1 = inverse.
+        </div>
+        <div id="correlationMatrix" style="overflow-x:auto;"></div>
+        <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;">
+                <div style="width:16px;height:16px;border-radius:4px;background:rgba(196,22,42,0.3);"></div>
+                <span style="font-size:12px;color:#6e6e73;">High positive (≥0.7)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <div style="width:16px;height:16px;border-radius:4px;background:rgba(255,149,0,0.2);"></div>
+                <span style="font-size:12px;color:#6e6e73;">Moderate (0.3–0.7)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <div style="width:16px;height:16px;border-radius:4px;background:rgba(28,127,62,0.1);"></div>
+                <span style="font-size:12px;color:#6e6e73;">Low (0–0.3)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <div style="width:16px;height:16px;border-radius:4px;background:rgba(28,127,62,0.25);"></div>
+                <span style="font-size:12px;color:#6e6e73;">Negative (&lt;0)</span>
+            </div>
+        </div>
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(0,113,227,0.04);border-radius:10px;border-left:3px solid #0071e3;">
+            <div style="font-size:13px;color:#6e6e73;line-height:1.5;">
+                <strong style="color:#1d1d1f;">Tip:</strong> Diversification works best when assets have low or negative correlation.
+                High correlation means your assets tend to fall together during market downturns.
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Correlation Matrix</div>
+        <div style="text-align:center;padding:32px;color:#6e6e73;">
+            <i class="bi bi-grid-3x3" style="font-size:36px;color:#c7c7cc;display:block;margin-bottom:12px;"></i>
+            <div style="font-size:14px;">Need at least 2 assets with price history.</div>
+            <div style="font-size:13px;margin-top:4px;">Refresh prices on your portfolio to build history.</div>
+        </div>
+    </div>
+    {% endif %}
+        <!-- Portfolio DNA -->
+{% if dna %}
+<div class="pq-card p-4 mb-4" style="border-top:4px solid {{ dna.color }};">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+        <div style="font-size:48px;">{{ dna.emoji }}</div>
+        <div>
+            <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Your Investor DNA</div>
+            <div style="font-size:24px;font-weight:700;color:{{ dna.color }};">{{ dna.personality }}</div>
+            <div style="font-size:14px;color:#6e6e73;margin-top:4px;">{{ dna.desc }}</div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <!-- Traits -->
+        <div class="col-md-4">
+            <div style="background:#f5f5f7;border-radius:14px;padding:16px;">
+                <div style="font-size:13px;font-weight:600;margin-bottom:12px;">Key Traits</div>
+                {% for trait in dna.traits %}
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+                    <div style="width:6px;height:6px;border-radius:50%;background:{{ dna.color }};flex-shrink:0;"></div>
+                    <span style="font-size:13px;">{{ trait }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- DNA Bars -->
+        <div class="col-md-8">
+            <div style="background:#f5f5f7;border-radius:14px;padding:16px;">
+                <div style="font-size:13px;font-weight:600;margin-bottom:16px;">DNA Profile</div>
+                {% for trait in dna.dna_traits %}
+                <div style="margin-bottom:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="font-size:12px;font-weight:500;">{{ trait.label }}</span>
+                        <span style="font-size:12px;color:#6e6e73;">{{ trait.value }}%</span>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.08);border-radius:8px;height:8px;overflow:hidden;position:relative;">
+                        <div style="position:absolute;left:0;top:0;bottom:0;width:{{ trait.value }}%;background:{{ trait.color }};border-radius:8px;transition:width 1s ease;"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                        <span style="font-size:10px;color:#6e6e73;">{{ trait.left }}</span>
+                        <span style="font-size:10px;color:#6e6e73;">{{ trait.right }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="text-align:center;padding:12px;background:#f5f5f7;border-radius:12px;">
+            <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Risk Score</div>
+            <div style="font-size:20px;font-weight:700;color:{{ dna.color }};">{{ dna.risk_score }}</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#f5f5f7;border-radius:12px;">
+            <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Crypto %</div>
+            <div style="font-size:20px;font-weight:700;">{{ dna.crypto_pct }}%</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#f5f5f7;border-radius:12px;">
+            <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Avg P&L</div>
+            <div style="font-size:20px;font-weight:700;" class="{% if dna.avg_pl >= 0 %}profit{% else %}loss{% endif %}">
+                {% if dna.avg_pl >= 0 %}+{% endif %}{{ dna.avg_pl }}%
+            </div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#f5f5f7;border-radius:12px;">
+            <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Assets</div>
+            <div style="font-size:20px;font-weight:700;">{{ dna.asset_count }}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+    <!-- Asset Type Breakdown -->
+    {% if all_assets %}
+    <div class="pq-card p-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:20px;">Asset Type Breakdown</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+            {% regroup all_assets by asset_type as grouped_assets %}
+            {% for group in grouped_assets %}
+            <div style="background:#f5f5f7;border-radius:14px;padding:16px;">
+                <div style="font-size:12px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">{{ group.grouper|title }}</div>
+                <div style="font-size:18px;font-weight:700;margin-bottom:4px;">{{ group.list|length }} asset{{ group.list|length|pluralize }}</div>
+                <div style="font-size:13px;color:#6e6e73;">
+                    {% for asset in group.list %}{{ asset.symbol }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if correlation %}
+<script>
+(function() {
+    const symbols = {{ correlation.symbols|safe }};
+    const matrix = {{ correlation.matrix|safe }};
+
+    function getColor(val) {
+        if (val === 1.0) return { bg: 'rgba(0,113,227,0.15)', color: '#0071e3' };
+        if (val >= 0.7) return { bg: 'rgba(196,22,42,0.25)', color: '#c4162a' };
+        if (val >= 0.3) return { bg: 'rgba(255,149,0,0.2)', color: '#b36200' };
+        if (val >= 0) return { bg: 'rgba(28,127,62,0.1)', color: '#1c7f3e' };
+        if (val >= -0.3) return { bg: 'rgba(28,127,62,0.18)', color: '#1c7f3e' };
+        return { bg: 'rgba(28,127,62,0.3)', color: '#1c7f3e' };
+    }
+
+    let html = '<table style="border-collapse:separate;border-spacing:4px;">';
+    html += '<thead><tr><th style="padding:8px 12px;"></th>';
+    symbols.forEach(s => {
+        html += `<th style="padding:8px 12px;font-size:12px;font-weight:600;text-align:center;">${s}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    matrix.forEach((row, ri) => {
+        html += `<tr><td style="padding:8px 12px;font-size:12px;font-weight:600;white-space:nowrap;">${symbols[ri]}</td>`;
+        row.forEach(val => {
+            const c = getColor(val);
+            html += `<td style="padding:4px;text-align:center;">
+                <div style="width:64px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:13px;font-weight:600;background:${c.bg};color:${c.color};">${val}</div>
+            </td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('correlationMatrix').innerHTML = html;
+})();
+</script>
+{% endif %}
+{% endblock %}

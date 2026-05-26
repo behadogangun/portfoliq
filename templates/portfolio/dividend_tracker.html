@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Dividend Tracker — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:1000px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Dividend Tracker</div>
+    <div class="pq-page-sub mb-4">Track dividend income from your stock holdings</div>
+
+    {% if dividend_data %}
+    <!-- Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #1c7f3e;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Annual Income</div>
+                <div style="font-size:28px;font-weight:700;color:#1c7f3e;">{{ total_annual_income|format_currency }}</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">from dividends</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #0071e3;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Monthly Income</div>
+                <div style="font-size:28px;font-weight:700;color:#0071e3;">{{ total_monthly_income|format_currency }}</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">avg per month</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #ff9500;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Dividend Stocks</div>
+                <div style="font-size:28px;font-weight:700;">{{ dividend_data|length }}</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">paying dividends</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Cards -->
+    {% for item in dividend_data %}
+    <div class="pq-card p-4 mb-3">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+            {% if item.asset.logo %}
+            <img src="{{ item.asset.logo }}" style="width:44px;height:44px;border-radius:12px;object-fit:contain;background:#f5f5f7;padding:4px;">
+            {% else %}
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0071e3;">
+                {{ item.asset.symbol|slice:":2" }}
+            </div>
+            {% endif %}
+            <div style="flex:1;">
+                <div style="font-size:16px;font-weight:700;">{{ item.asset.symbol }}</div>
+                <div style="font-size:13px;color:#6e6e73;">{{ item.asset.name }} · {{ item.shares|format_quantity }} shares</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:20px;font-weight:700;color:#1c7f3e;">{{ item.annual_income|format_currency }}/yr</div>
+                <div style="font-size:13px;color:#6e6e73;">{{ item.monthly_income|format_currency }}/mo</div>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:{% if item.info.recent_dividends %}16px{% else %}0{% endif %};">
+            <div style="background:#f5f5f7;border-radius:10px;padding:12px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Annual Dividend</div>
+                <div style="font-size:15px;font-weight:600;">${{ item.info.annual_dividend }}</div>
+                <div style="font-size:11px;color:#6e6e73;">per share</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:12px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Dividend Yield</div>
+                <div style="font-size:15px;font-weight:600;color:#1c7f3e;">{{ item.info.dividend_yield }}%</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:12px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Payout Ratio</div>
+                <div style="font-size:15px;font-weight:600;">{{ item.info.payout_ratio }}%</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:12px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Stock Price</div>
+                <div style="font-size:15px;font-weight:600;">{{ item.info.price|format_price }}</div>
+            </div>
+        </div>
+
+        {% if item.info.recent_dividends %}
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;color:#6e6e73;">Recent Payments</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            {% for div in item.info.recent_dividends %}
+            <div style="background:rgba(28,127,62,0.06);border-radius:8px;padding:6px 12px;font-size:12px;">
+                <span style="color:#6e6e73;">{{ div.date }}</span>
+                <span style="font-weight:600;color:#1c7f3e;margin-left:6px;">${{ div.amount }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-cash-coin" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;">No dividend stocks found</div>
+        <div style="font-size:14px;color:#6e6e73;">
+            Add dividend-paying stocks (like AAPL, JNJ, KO) to your portfolio to track income here.
+        </div>
+        <a href="{% url 'portfolio_list' %}" class="btn-apple" style="margin-top:16px;">View Portfolios</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

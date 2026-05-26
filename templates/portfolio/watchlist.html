@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Watchlist — PortfoliQ{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;padding:40px 24px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="pq-page-title">Watchlist</div>
+            <div class="pq-page-sub">Track assets without adding to portfolio</div>
+        </div>
+        <button onclick="document.getElementById('addModal').style.display='flex'" class="btn-apple">
+            <i class="bi bi-plus me-1"></i> Add Asset
+        </button>
+    </div>
+
+    <div class="pq-card">
+        <table class="pq-table">
+            <thead>
+                <tr>
+                    <th>Asset</th>
+                    <th style="text-align:right;">Price</th>
+                    <th style="text-align:right;">24h %</th>
+                    <th style="text-align:right;">Market Cap</th>
+                    <th style="text-align:right;">Added</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in watchlist_data %}
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            {% if row.item.logo %}
+                            <img src="{{ row.item.logo }}" style="width:36px;height:36px;border-radius:10px;object-fit:contain;background:#f5f5f7;padding:3px;">
+                            {% else %}
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0071e3;">
+                                {{ row.item.symbol|slice:":2" }}
+                            </div>
+                            {% endif %}
+                            <div>
+                                <div style="font-size:14px;font-weight:600;">{{ row.item.symbol }}</div>
+                                <div style="font-size:12px;color:#6e6e73;">{{ row.item.name }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="text-align:right;font-size:14px;font-weight:600;">
+                        {% if row.price %}{{ row.price|format_price }}{% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right;">
+                        {% if row.change_24h %}
+                        <span style="font-size:13px;font-weight:500;" class="{% if row.change_24h >= 0 %}profit{% else %}loss{% endif %}">
+                            {% if row.change_24h >= 0 %}+{% endif %}{{ row.change_24h|floatformat:2 }}%
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right;font-size:13px;color:#6e6e73;">
+                        {% if row.market_cap %}{{ row.market_cap|format_number }}{% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right;font-size:13px;color:#6e6e73;">
+                        {{ row.item.added_at|date:"d M Y" }}
+                    </td>
+                    <td>
+                        <a href="{% url 'watchlist_remove' row.item.pk %}" class="btn-icon btn-icon-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:48px;color:#6e6e73;">
+                        <i class="bi bi-eye" style="font-size:36px;color:#c7c7cc;display:block;margin-bottom:12px;"></i>
+                        No assets in your watchlist.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+    <div class="pq-card p-4" style="width:100%;max-width:480px;margin:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div style="font-size:17px;font-weight:600;">Add to Watchlist</div>
+            <button onclick="document.getElementById('addModal').style.display='none'" class="btn-icon">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Search asset</label>
+        <input type="text" id="watchSearchInput" class="pq-input mb-3" placeholder="Search AAPL, BTC..." autocomplete="off">
+        <div id="watchSearchResults" style="display:none;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);border:1px solid rgba(0,0,0,0.08);overflow:hidden;margin-bottom:12px;"></div>
+
+        <div id="watchPreview" style="display:none;background:#f5f5f7;border-radius:12px;padding:14px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <img id="watchPreviewLogo" src="" style="width:36px;height:36px;border-radius:10px;object-fit:contain;background:#fff;padding:3px;" onerror="this.style.display='none'">
+                <div>
+                    <div id="watchPreviewName" style="font-size:14px;font-weight:600;"></div>
+                    <div id="watchPreviewMeta" style="font-size:12px;color:#6e6e73;"></div>
+                </div>
+                <div style="margin-left:auto;text-align:right;">
+                    <div id="watchPreviewPrice" style="font-size:16px;font-weight:700;"></div>
+                    <div id="watchPreviewChange" style="font-size:12px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" action="{% url 'watchlist_add' %}" id="watchForm">
+            {% csrf_token %}
+            <input type="hidden" name="symbol" id="w_symbol">
+            <input type="hidden" name="name" id="w_name">
+            <input type="hidden" name="asset_type" id="w_type">
+            <input type="hidden" name="logo" id="w_logo">
+            <div id="watchError" style="font-size:13px;color:#c4162a;margin-bottom:12px;display:none;">Please select an asset first.</div>
+            <div style="display:flex;gap:8px;">
+                <button type="submit" class="btn-apple" style="padding:10px 20px;">Add to Watchlist</button>
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="btn-apple-secondary" style="padding:10px 20px;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let watchSelected = null;
+const watchInput = document.getElementById('watchSearchInput');
+const watchResults = document.getElementById('watchSearchResults');
+let watchTimer;
+
+watchInput.addEventListener('input', () => {
+    clearTimeout(watchTimer);
+    const q = watchInput.value.trim();
+    if (q.length < 1) { watchResults.style.display = 'none'; return; }
+    watchTimer = setTimeout(() => {
+        fetch(`{% url 'asset_search' %}?q=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.results.length) { watchResults.style.display = 'none'; return; }
+                watchResults.innerHTML = data.results.map(r => `
+                    <div onclick='selectWatch(${JSON.stringify(r)})'
+                         style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,0.04);"
+                         onmouseover="this.style.background='rgba(0,0,0,0.025)'"
+                         onmouseout="this.style.background='transparent'">
+                        ${r.logo ? `<img src="${r.logo}" style="width:28px;height:28px;border-radius:6px;object-fit:contain;background:#f5f5f7;padding:2px;">` : `<div style="width:28px;height:28px;border-radius:6px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0071e3;">${r.symbol.slice(0,2)}</div>`}
+                        <div style="flex:1;">
+                            <div style="font-size:14px;font-weight:600;">${r.symbol}</div>
+                            <div style="font-size:12px;color:#6e6e73;">${r.name}</div>
+                        </div>
+                        <span style="font-size:11px;padding:3px 9px;border-radius:980px;background:${r.type==='crypto'?'rgba(255,149,0,0.1)':'rgba(0,113,227,0.1)'};color:${r.type==='crypto'?'#b36200':'#0071e3'};font-weight:500;">${r.type}</span>
+                    </div>
+                `).join('');
+                watchResults.style.display = 'block';
+            });
+    }, 350);
+});
+
+function selectWatch(asset) {
+    watchSelected = asset;
+    watchInput.value = `${asset.symbol} — ${asset.name}`;
+    watchResults.style.display = 'none';
+    document.getElementById('w_symbol').value = asset.symbol;
+    document.getElementById('w_name').value = asset.name;
+    document.getElementById('w_type').value = asset.type;
+    document.getElementById('w_logo').value = asset.logo || '';
+    document.getElementById('watchError').style.display = 'none';
+
+    const preview = document.getElementById('watchPreview');
+    preview.style.display = 'block';
+    document.getElementById('watchPreviewLogo').src = asset.logo || '';
+    document.getElementById('watchPreviewName').textContent = asset.name;
+    document.getElementById('watchPreviewMeta').textContent = `${asset.symbol} · ${asset.type}`;
+    document.getElementById('watchPreviewPrice').textContent = 'Loading...';
+
+    fetch(`{% url 'asset_info' %}?symbol=${asset.symbol}&type=${asset.type}`)
+        .then(r => r.json())
+        .then(info => {
+            if (info.price) {
+                document.getElementById('watchPreviewPrice').textContent = '$' + Number(info.price).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+            }
+            if (info.change_24h !== undefined) {
+                const el = document.getElementById('watchPreviewChange');
+                const sign = info.change_24h >= 0 ? '+' : '';
+                el.textContent = `${sign}${info.change_24h.toFixed(2)}% today`;
+                el.style.color = info.change_24h >= 0 ? '#1c7f3e' : '#c4162a';
+            }
+        }).catch(() => { document.getElementById('watchPreviewPrice').textContent = ''; });
+}
+
+document.getElementById('watchForm').addEventListener('submit', e => {
+    if (!watchSelected) {
+        e.preventDefault();
+        document.getElementById('watchError').style.display = 'block';
+    }
+});
+
+document.addEventListener('click', e => {
+    if (!watchInput.contains(e.target) && !watchResults.contains(e.target)) {
+        watchResults.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

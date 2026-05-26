@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Insider Trading — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:1000px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Insider Trading Feed</div>
+    <div class="pq-page-sub mb-4">Recent buy and sell transactions by company executives and directors</div>
+
+    {% if trades %}
+
+    <!-- Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #1c7f3e;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Insider Buys</div>
+                <div style="font-size:28px;font-weight:700;color:#1c7f3e;">
+                    {{ trades|length }}
+                </div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">recent transactions</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #0071e3;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Companies</div>
+                <div style="font-size:28px;font-weight:700;">
+                    {% with unique=trades|length %}{{ unique }}{% endwith %}
+                </div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">tracked</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #ff9500;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Signal</div>
+                <div style="font-size:28px;font-weight:700;color:#ff9500;">📡</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">live insider data</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trades Table -->
+    <div class="pq-card">
+        <div style="padding:20px 20px 0;margin-bottom:4px;">
+            <div style="font-size:16px;font-weight:600;">Recent Transactions</div>
+            <div style="font-size:13px;color:#6e6e73;margin-top:2px;">Purchases and sales by insiders in the last 30 days</div>
+        </div>
+        <table class="pq-table" style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Insider</th>
+                    <th>Position</th>
+                    <th>Type</th>
+                    <th style="text-align:right;">Shares</th>
+                    <th style="text-align:right;">Value</th>
+                    <th style="text-align:right;">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trade in trades %}
+                <tr>
+                    <td>
+                        <span style="font-size:13px;font-weight:700;padding:4px 10px;border-radius:8px;background:rgba(0,113,227,0.08);color:#0071e3;">
+                            {{ trade.symbol }}
+                        </span>
+                    </td>
+                    <td style="font-weight:500;font-size:13px;">{{ trade.insider }}</td>
+                    <td style="font-size:12px;color:#6e6e73;">{{ trade.position }}</td>
+                    <td>
+                        <span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:980px;
+                            background:{% if trade.is_buy %}rgba(28,127,62,0.1){% else %}rgba(196,22,42,0.1){% endif %};
+                            color:{% if trade.is_buy %}#1c7f3e{% else %}#c4162a{% endif %};">
+                            {% if trade.is_buy %}▲ Buy{% else %}▼ Sell{% endif %}
+                        </span>
+                    </td>
+                    <td style="text-align:right;font-size:13px;">
+                        {% if trade.shares %}{{ trade.shares|floatformat:0 }}{% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right;font-weight:500;font-size:13px;">
+                        {% if trade.value %}
+                            ${{ trade.value|floatformat:0 }}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right;font-size:12px;color:#6e6e73;">{{ trade.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-person-badge" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;">No insider trades found</div>
+        <div style="font-size:14px;color:#6e6e73;margin-top:8px;">Could not load insider trading data. Please try again later.</div>
+    </div>
+    {% endif %}
+
+    <!-- Info -->
+    <div class="pq-card p-4 mt-4" style="background:rgba(0,113,227,0.03);border-left:3px solid #0071e3;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px;">💡 Why track insider trading?</div>
+        <div style="font-size:14px;color:#6e6e73;line-height:1.6;">
+            Corporate insiders — executives, directors, and major shareholders — must report their trades to the SEC.
+            When insiders buy their own stock, it's often seen as a bullish signal since they know the company best.
+            Insider selling can have many reasons (diversification, taxes) and is less meaningful on its own.
+            Data sourced from public SEC filings via Yahoo Finance.
+        </div>
+    </div>
+
+</div>
+{% endblock %}

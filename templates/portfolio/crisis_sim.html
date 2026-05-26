@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Crisis Simulator — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:900px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Crisis Simulator</div>
+    <div class="pq-page-sub mb-4">What would happen to your portfolio during historical market crashes?</div>
+
+    <!-- Crisis Selector -->
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:13px;font-weight:500;color:#6e6e73;margin-bottom:12px;">Select a crisis scenario:</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            {% for crisis in crises %}
+            <a href="?crisis={{ crisis.key }}"
+               style="padding:8px 16px;border-radius:12px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.15s;
+                   background:{% if selected == crisis.key %}#0071e3{% else %}rgba(0,0,0,0.05){% endif %};
+                   color:{% if selected == crisis.key %}white{% else %}#1d1d1f{% endif %};">
+                {{ crisis.emoji }} {{ crisis.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if result %}
+    {% with crisis=result.crisis %}
+
+    <!-- Crisis Banner -->
+    <div class="pq-card p-5 mb-4 text-center" style="background:linear-gradient(135deg,{{ crisis.color }},{{ crisis.color }}88);color:white;">
+        <div style="font-size:48px;margin-bottom:12px;">{{ crisis.emoji }}</div>
+        <div style="font-size:24px;font-weight:700;margin-bottom:4px;">{{ crisis.name }}</div>
+        <div style="font-size:14px;opacity:0.85;margin-bottom:12px;">{{ crisis.date }}</div>
+        <div style="font-size:14px;opacity:0.8;max-width:500px;margin:0 auto;">{{ crisis.description }}</div>
+    </div>
+
+    <!-- Impact Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #6e6e73;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Current Value</div>
+                <div style="font-size:20px;font-weight:700;">{{ result.total_value|format_currency }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #c4162a;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">After Crisis</div>
+                <div style="font-size:20px;font-weight:700;color:#c4162a;">{{ result.scenario_value|format_currency }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #c4162a;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Total Loss</div>
+                <div style="font-size:20px;font-weight:700;color:#c4162a;">{{ result.total_loss|format_currency }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #c4162a;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Portfolio Drop</div>
+                <div style="font-size:20px;font-weight:700;color:#c4162a;">{{ result.total_drop_pct|floatformat:1 }}%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Impact Bar -->
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Portfolio Impact Visualization</div>
+        <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+                <span style="font-weight:500;">Current Value</span>
+                <span>{{ result.total_value|format_currency }}</span>
+            </div>
+            <div style="background:rgba(0,0,0,0.06);border-radius:8px;height:24px;overflow:hidden;">
+                <div style="height:100%;width:100%;background:#0071e3;border-radius:8px;"></div>
+            </div>
+        </div>
+        <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+                <span style="font-weight:500;">After Crisis</span>
+                <span style="color:#c4162a;">{{ result.scenario_value|format_currency }}</span>
+            </div>
+            <div style="background:rgba(0,0,0,0.06);border-radius:8px;height:24px;overflow:hidden;">
+                {% with pct=result.scenario_value|floatformat:0 %}
+                <div style="height:100%;width:{% widthratio result.scenario_value result.total_value 100 %}%;background:#c4162a;border-radius:8px;transition:width 1s ease;"></div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Best & Worst -->
+    {% if result.worst_asset and result.best_asset %}
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="pq-card p-4" style="border-top:3px solid #c4162a;">
+                <div style="font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">💥 Most Impacted</div>
+                <div style="font-size:20px;font-weight:700;">{{ result.worst_asset.symbol }}</div>
+                <div style="font-size:13px;color:#6e6e73;margin-bottom:8px;">{{ result.worst_asset.name }}</div>
+                <div style="font-size:24px;font-weight:700;color:#c4162a;">{{ result.worst_asset.drop_pct|floatformat:1 }}%</div>
+                <div style="font-size:13px;color:#6e6e73;">{{ result.worst_asset.loss|format_currency }} loss</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="pq-card p-4" style="border-top:3px solid #1c7f3e;">
+                <div style="font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🛡️ Most Resilient</div>
+                <div style="font-size:20px;font-weight:700;">{{ result.best_asset.symbol }}</div>
+                <div style="font-size:13px;color:#6e6e73;margin-bottom:8px;">{{ result.best_asset.name }}</div>
+                <div style="font-size:24px;font-weight:700;" class="{% if result.best_asset.drop_pct >= 0 %}profit{% else %}loss{% endif %}">
+                    {{ result.best_asset.drop_pct|floatformat:1 }}%
+                </div>
+                <div style="font-size:13px;color:#6e6e73;">{{ result.best_asset.loss|format_currency }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Asset by Asset -->
+    <div class="pq-card">
+        <div style="padding:20px 20px 0;font-size:16px;font-weight:600;margin-bottom:4px;">Asset-by-Asset Impact</div>
+        <table class="pq-table" style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>Asset</th>
+                    <th style="text-align:right;">Current Value</th>
+                    <th style="text-align:right;">Crisis Drop</th>
+                    <th style="text-align:right;">After Crisis</th>
+                    <th style="text-align:right;">Loss</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asset in result.asset_results %}
+                <tr>
+                    <td>
+                        <div style="font-weight:600;">{{ asset.symbol }}</div>
+                        <div style="font-size:12px;color:#6e6e73;">{{ asset.name|truncatechars:20 }}</div>
+                    </td>
+                    <td style="text-align:right;">{{ asset.current_value|format_currency }}</td>
+                    <td style="text-align:right;">
+                        <span style="font-weight:600;color:{% if asset.drop_pct >= 0 %}#1c7f3e{% else %}#c4162a{% endif %};">
+                            {{ asset.drop_pct|floatformat:1 }}%
+                        </span>
+                    </td>
+                    <td style="text-align:right;">{{ asset.new_value|format_currency }}</td>
+                    <td style="text-align:right;color:#c4162a;font-weight:500;">
+                        {{ asset.loss|format_currency }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% endwith %}
+
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-exclamation-triangle" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;">No portfolio data</div>
+        <div style="font-size:14px;color:#6e6e73;margin-top:8px;">Add assets to your portfolio to run crisis simulations.</div>
+        <a href="{% url 'portfolio_list' %}" class="btn-apple" style="margin-top:16px;">View Portfolios</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

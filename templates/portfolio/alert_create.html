@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}New Alert — PortfoliQ{% endblock %}
+
+{% block content %}
+<div style="max-width:520px;margin:0 auto;padding:40px 24px;">
+    <div class="pq-page-title mb-1">New Price Alert</div>
+    <div class="pq-page-sub mb-4">Get notified when an asset hits your target</div>
+
+    <div class="pq-card p-4 mb-3">
+        <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Search asset</label>
+        <input type="text" id="alertSearchInput" class="pq-input" placeholder="Search AAPL, BTC..." autocomplete="off">
+        <div id="alertSearchResults" style="display:none;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);border:1px solid rgba(0,0,0,0.08);overflow:hidden;margin-top:8px;"></div>
+    </div>
+
+    <div id="alertPreview" class="pq-card p-4 mb-3" style="display:none;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <img id="alertPreviewLogo" src="" style="width:40px;height:40px;border-radius:10px;object-fit:contain;background:#f5f5f7;padding:3px;" onerror="this.style.display='none'">
+            <div>
+                <div id="alertPreviewName" style="font-size:15px;font-weight:600;"></div>
+                <div id="alertPreviewMeta" style="font-size:12px;color:#6e6e73;"></div>
+            </div>
+            <div style="margin-left:auto;text-align:right;">
+                <div id="alertPreviewPrice" style="font-size:18px;font-weight:700;"></div>
+                <div id="alertPreviewChange" style="font-size:12px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pq-card p-4">
+        <form method="post" action="{% url 'alert_create' %}" id="alertForm">
+            {% csrf_token %}
+            <input type="hidden" name="symbol" id="a_symbol">
+            <input type="hidden" name="name" id="a_name">
+            <input type="hidden" name="asset_type" id="a_type">
+            <input type="hidden" name="logo" id="a_logo">
+
+            <div class="mb-3">
+                <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Alert Condition</label>
+                <select name="alert_type" class="pq-input">
+                    <option value="above">Price goes above</option>
+                    <option value="below">Price goes below</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Target Price (USD)</label>
+                <input type="number" name="target_price" id="a_target" class="pq-input" step="0.01" placeholder="0.00" required>
+            </div>
+
+            <div id="alertError" style="font-size:13px;color:#c4162a;margin-bottom:12px;display:none;">
+                Please search and select an asset first.
+            </div>
+
+            <div style="display:flex;gap:8px;">
+                <button type="submit" class="btn-apple" style="padding:10px 20px;">Create Alert</button>
+                <a href="{% url 'alerts' %}" class="btn-apple-secondary" style="padding:10px 20px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let alertSelected = null;
+const alertInput = document.getElementById('alertSearchInput');
+const alertResults = document.getElementById('alertSearchResults');
+let alertTimer;
+
+alertInput.addEventListener('input', () => {
+    clearTimeout(alertTimer);
+    const q = alertInput.value.trim();
+    if (q.length < 1) { alertResults.style.display = 'none'; return; }
+    alertTimer = setTimeout(() => {
+        fetch(`{% url 'asset_search' %}?q=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.results.length) { alertResults.style.display = 'none'; return; }
+                alertResults.innerHTML = data.results.map(r => `
+                    <div onclick='selectAlert(${JSON.stringify(r)})'
+                         style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,0.04);"
+                         onmouseover="this.style.background='rgba(0,0,0,0.025)'"
+                         onmouseout="this.style.background='transparent'">
+                        ${r.logo ? `<img src="${r.logo}" style="width:28px;height:28px;border-radius:6px;object-fit:contain;background:#f5f5f7;padding:2px;">` : `<div style="width:28px;height:28px;border-radius:6px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0071e3;">${r.symbol.slice(0,2)}</div>`}
+                        <div style="flex:1;">
+                            <div style="font-size:14px;font-weight:600;">${r.symbol}</div>
+                            <div style="font-size:12px;color:#6e6e73;">${r.name}</div>
+                        </div>
+                        <span style="font-size:11px;padding:3px 9px;border-radius:980px;background:${r.type==='crypto'?'rgba(255,149,0,0.1)':'rgba(0,113,227,0.1)'};color:${r.type==='crypto'?'#b36200':'#0071e3'};font-weight:500;">${r.type}</span>
+                    </div>
+                `).join('');
+                alertResults.style.display = 'block';
+            });
+    }, 350);
+});
+
+function selectAlert(asset) {
+    alertSelected = asset;
+    alertInput.value = `${asset.symbol} — ${asset.name}`;
+    alertResults.style.display = 'none';
+    document.getElementById('a_symbol').value = asset.symbol;
+    document.getElementById('a_name').value = asset.name;
+    document.getElementById('a_type').value = asset.type;
+    document.getElementById('a_logo').value = asset.logo || '';
+    document.getElementById('alertError').style.display = 'none';
+
+    document.getElementById('alertPreview').style.display = 'block';
+    document.getElementById('alertPreviewLogo').src = asset.logo || '';
+    document.getElementById('alertPreviewName').textContent = asset.name;
+    document.getElementById('alertPreviewMeta').textContent = `${asset.symbol} · ${asset.type}`;
+    document.getElementById('alertPreviewPrice').textContent = 'Loading...';
+
+    fetch(`{% url 'asset_info' %}?symbol=${asset.symbol}&type=${asset.type}`)
+        .then(r => r.json())
+        .then(info => {
+            if (info.price) {
+                document.getElementById('alertPreviewPrice').textContent = '$' + Number(info.price).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+                document.getElementById('a_target').value = info.price;
+            }
+            if (info.change_24h !== undefined) {
+                const el = document.getElementById('alertPreviewChange');
+                const sign = info.change_24h >= 0 ? '+' : '';
+                el.textContent = `${sign}${info.change_24h.toFixed(2)}% today`;
+                el.style.color = info.change_24h >= 0 ? '#1c7f3e' : '#c4162a';
+            }
+        }).catch(() => { document.getElementById('alertPreviewPrice').textContent = ''; });
+}
+
+document.getElementById('alertForm').addEventListener('submit', e => {
+    if (!alertSelected) {
+        e.preventDefault();
+        document.getElementById('alertError').style.display = 'block';
+    }
+});
+
+document.addEventListener('click', e => {
+    if (!alertInput.contains(e.target) && !alertResults.contains(e.target)) {
+        alertResults.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PortfoliQ{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { -webkit-font-smoothing: antialiased; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; background: #f5f5f7; color: #1d1d1f; }
+        .pq-nav { background: rgba(255,255,255,0.85); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 1000; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
+        .pq-nav-brand { font-size: 17px; font-weight: 600; color: #1d1d1f; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .pq-nav-links { display: flex; align-items: center; gap: 4px; }
+        .pq-nav-link { font-size: 14px; color: #6e6e73; text-decoration: none; padding: 6px 12px; border-radius: 8px; transition: all 0.15s; }
+        .pq-nav-link:hover { background: rgba(0,0,0,0.05); color: #1d1d1f; }
+        .pq-nav-link.active { background: rgba(0,113,227,0.08); color: #0071e3; font-weight: 500; }
+        .pq-nav-dropdown { position: relative; display: inline-flex; align-items: center; }
+        .pq-nav-dropdown-btn { font-size: 14px; color: #6e6e73; text-decoration: none; padding: 6px 12px; border-radius: 8px; transition: all 0.15s; display: flex; align-items: center; gap: 4px; border: none; background: none; cursor: pointer; font-family: inherit; }
+        .pq-nav-dropdown-btn:hover { background: rgba(0,0,0,0.05); color: #1d1d1f; }
+        .pq-nav-dropdown-btn.active { background: rgba(0,113,227,0.08); color: #0071e3; font-weight: 500; }
+        .pq-nav-dropdown-btn i.chevron { font-size: 10px; transition: transform 0.2s; }
+        .pq-nav-dropdown.open .pq-nav-dropdown-btn i.chevron { transform: rotate(180deg); }
+        .pq-nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: rgba(255,255,255,0.97); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.1); border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); padding: 6px; min-width: 200px; z-index: 1001; }
+        .pq-nav-dropdown.open .pq-nav-dropdown-menu { display: block; }
+        .pq-nav-dropdown-menu a { font-size: 14px; padding: 8px 12px; border-radius: 8px; color: #1d1d1f; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: background 0.1s; }
+        .pq-nav-dropdown-menu a:hover { background: rgba(0,0,0,0.05); }
+        .pq-nav-dropdown-menu .menu-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 4px 0; }
+        .pq-nav-dropdown-menu .menu-label { font-size: 11px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 12px 2px; }
+        body.dark .pq-nav-dropdown-menu { background: rgba(44,44,46,0.98); border-color: rgba(255,255,255,0.1); }
+        body.dark .pq-nav-dropdown-menu a { color: #f5f5f7; }
+        body.dark .pq-nav-dropdown-menu a:hover { background: rgba(255,255,255,0.06); }
+        body.dark .pq-nav-dropdown-btn { color: #98989d; }
+        body.dark .pq-nav-dropdown-btn:hover { background: rgba(255,255,255,0.06); color: #f5f5f7; }
+        body.dark .pq-nav-dropdown-menu .menu-divider { background: rgba(255,255,255,0.08); }
+        body.dark .pq-nav-dropdown-menu .menu-label { color: #6e6e73; }
+        .pq-nav-right { display: flex; align-items: center; gap: 8px; }
+        .pq-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #0071e3, #34aadc); color: white; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .pq-card { background: #ffffff; border-radius: 18px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.06); overflow: hidden; transition: box-shadow 0.2s ease, transform 0.2s ease; }
+        .pq-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.06); }
+        .pq-card-sm { border-radius: 14px; }
+        .stat-value { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }
+        .stat-card-value { font-size: 32px; font-weight: 700; letter-spacing: -1.5px; line-height: 1; }
+        .stat-label { font-size: 13px; color: #6e6e73; font-weight: 400; }
+        @keyframes badge-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .profit { color: #1c7f3e; animation: badge-pulse 2.5s ease-in-out infinite; }
+        .loss { color: #c4162a; animation: badge-pulse 2.5s ease-in-out infinite; }
+        .btn-apple { background: #0071e3; color: white; border: none; border-radius: 980px; padding: 8px 18px; font-size: 14px; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; text-decoration: none; }
+        .btn-apple:hover { background: #0077ed; color: white; }
+        .btn-apple:active { transform: scale(0.97); background: #006edb; }
+        .btn-apple-secondary { background: rgba(0,0,0,0.05); color: #1d1d1f; border: none; border-radius: 980px; padding: 8px 18px; font-size: 14px; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; text-decoration: none; }
+        .btn-apple-secondary:hover { background: rgba(0,0,0,0.09); color: #1d1d1f; }
+        .btn-apple-secondary:active { transform: scale(0.97); }
+        .btn-apple-danger { background: rgba(196,22,42,0.08); color: #c4162a; border: none; border-radius: 980px; padding: 8px 18px; font-size: 14px; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; text-decoration: none; }
+        .btn-apple-danger:hover { background: rgba(196,22,42,0.13); color: #c4162a; }
+        .btn-icon { width: 32px; height: 32px; border-radius: 8px; border: none; background: rgba(0,0,0,0.05); color: #6e6e73; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; text-decoration: none; cursor: pointer; }
+        .btn-icon:hover { background: rgba(0,0,0,0.09); color: #1d1d1f; }
+        .btn-icon-danger:hover { background: rgba(196,22,42,0.1); color: #c4162a; }
+        .btn-icon-primary:hover { background: rgba(0,113,227,0.1); color: #0071e3; }
+        .pq-badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 980px; background: rgba(0,0,0,0.06); color: #6e6e73; }
+        .pq-table { width: 100%; border-collapse: collapse; }
+        .pq-table th { font-size: 12px; font-weight: 500; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+        .pq-table td { font-size: 14px; padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+        .pq-table tr:last-child td { border-bottom: none; }
+        .pq-table tbody tr { transition: background 0.1s ease; }
+        .pq-table tr:hover td { background: rgba(0,0,0,0.015); }
+        .pq-input { background: rgba(0,0,0,0.04); border: 1px solid transparent; border-radius: 10px; padding: 10px 14px; font-size: 15px; width: 100%; transition: all 0.15s; outline: none; font-family: inherit; }
+        .pq-input:focus { background: #fff; border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+        select.pq-input { cursor: pointer; }
+        .pq-alert { border-radius: 12px; border: none; font-size: 14px; padding: 12px 16px; }
+        .pq-page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        .pq-page-sub { font-size: 15px; color: #6e6e73; margin-top: 2px; }
+        .pq-dropdown { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.1); border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); padding: 6px; min-width: 160px; }
+        .pq-dropdown-item { font-size: 14px; padding: 8px 12px; border-radius: 8px; color: #1d1d1f; text-decoration: none; display: block; transition: background 0.1s; }
+        .pq-dropdown-item:hover { background: rgba(0,0,0,0.05); color: #1d1d1f; }
+        .pq-dropdown-item.danger { color: #c4162a; }
+        .pq-dropdown-item.danger:hover { background: rgba(196,22,42,0.07); }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .ticker-item { display: inline-flex; align-items: center; gap: 8px; padding: 0 20px; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.06); height: 32px; white-space: nowrap; }
+        .ticker-symbol { font-weight: 600; color: #f5f5f7; }
+        .ticker-price { color: #98989d; }
+        .ticker-change-up { color: #30d158; font-weight: 500; }
+        .ticker-change-down { color: #ff453a; font-weight: 500; }
+        @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skeleton { background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.04) 50%, rgba(0,0,0,0.06) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite; border-radius: 8px; }
+        .count-up { transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes card-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .pq-card { animation: card-enter 0.3s ease forwards; }
+        .pq-card:nth-child(1) { animation-delay: 0.05s; }
+        .pq-card:nth-child(2) { animation-delay: 0.10s; }
+        .pq-card:nth-child(3) { animation-delay: 0.15s; }
+        .pq-card:nth-child(4) { animation-delay: 0.20s; }
+        @keyframes value-flash { 0% { opacity: 1; } 50% { opacity: 0.3; color: #0071e3; } 100% { opacity: 1; } }
+        .value-updated { animation: value-flash 0.4s ease; }
+        @keyframes page-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .page-content { animation: page-enter 0.25s ease forwards; }
+        @keyframes profit-pop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        .profit-updated { animation: profit-pop 0.3s ease; }
+        .stat-number { display: inline-block; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .stat-number:hover { transform: scale(1.02); }
+        body.dark { background: #000; color: #f5f5f7; }
+        body.dark .pq-nav { background: rgba(28,28,30,0.85); border-bottom-color: rgba(255,255,255,0.08); }
+        body.dark .pq-nav-brand { color: #f5f5f7; }
+        body.dark .pq-nav-link { color: #98989d; }
+        body.dark .pq-nav-link:hover { background: rgba(255,255,255,0.06); color: #f5f5f7; }
+        body.dark .pq-card { background: #1c1c1e; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        body.dark .pq-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        body.dark .pq-input { background: rgba(255,255,255,0.06); color: #f5f5f7; border-color: transparent; }
+        body.dark .pq-input:focus { background: rgba(255,255,255,0.09); border-color: #0071e3; }
+        body.dark .pq-table th { color: #98989d; border-bottom-color: rgba(255,255,255,0.06); }
+        body.dark .pq-table td { border-bottom-color: rgba(255,255,255,0.04); color: #f5f5f7; }
+        body.dark .pq-table tr:hover td { background: rgba(255,255,255,0.03); }
+        body.dark .pq-badge { background: rgba(255,255,255,0.08); color: #98989d; }
+        body.dark .pq-dropdown { background: rgba(44,44,46,0.98); border-color: rgba(255,255,255,0.1); }
+        body.dark .pq-dropdown-item { color: #f5f5f7; }
+        body.dark .pq-dropdown-item:hover { background: rgba(255,255,255,0.06); }
+        body.dark .pq-page-sub { color: #98989d; }
+        body.dark .text-muted { color: #98989d !important; }
+        body.dark .alert { background: #2c2c2e; color: #f5f5f7; }
+        body.dark select.pq-input option { background: #1c1c1e; }
+        body.dark .btn-apple-secondary { background: rgba(255,255,255,0.08); color: #f5f5f7; }
+        body.dark .btn-apple-secondary:hover { background: rgba(255,255,255,0.12); color: #f5f5f7; }
+        body.dark .btn-icon { background: rgba(255,255,255,0.06); color: #98989d; }
+        body.dark .btn-icon:hover { background: rgba(255,255,255,0.1); color: #f5f5f7; }
+        body.dark #liveTicker { background: #000; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        body.dark .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.06) 75%); background-size: 200% 100%; }
+        body.dark .pq-mobile-link { color: #f5f5f7; }
+        body.dark .pq-mobile-link:hover { background: rgba(255,255,255,0.06); }
+        body.dark #mobileMenu { background: rgba(28,28,30,0.97); border-bottom-color: rgba(255,255,255,0.08); }
+        .pq-mobile-link { display: flex; align-items: center; padding: 12px 8px; font-size: 15px; color: #1d1d1f; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.04); border-radius: 8px; transition: background 0.1s; }
+        .pq-mobile-link:hover { background: rgba(0,0,0,0.04); color: #1d1d1f; }
+        .pq-mobile-section { font-size: 11px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 8px 4px; }
+        @media (max-width: 768px) {
+            .pq-nav { padding: 0 16px; height: 48px; }
+            .pq-desktop-links { display: none !important; }
+            #mobileMenuBtn { display: flex !important; }
+            .pq-page-title { font-size: 22px; }
+            .stat-card-value { font-size: 22px; }
+            .pq-nav-brand { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="pq-nav">
+    {% if not user.is_authenticated %}
+    <div class="pq-nav-links">
+        <a href="{% url 'landing' %}" class="pq-nav-brand">
+            <i class="bi bi-graph-up-arrow" style="color:#0071e3"></i> PortfoliQ
+        </a>
+    </div>
+    <div class="pq-nav-right">
+        <button id="darkToggle" onclick="toggleDark()" class="btn-icon" title="Toggle dark mode">
+            <i class="bi bi-moon" id="darkIcon"></i>
+        </button>
+        <a href="{% url 'login' %}" class="pq-nav-link">Sign In</a>
+        <a href="{% url 'register' %}" class="btn-apple" style="padding:6px 16px;font-size:13px;">Get Started</a>
+    </div>
+    {% else %}
+    <div class="pq-nav-links">
+        <a href="{% url 'dashboard' %}" class="pq-nav-brand">
+            <i class="bi bi-graph-up-arrow" style="color:#0071e3"></i> PortfoliQ
+        </a>
+        <div class="pq-desktop-links" style="display:flex;align-items:center;gap:4px;">
+            <a href="{% url 'dashboard' %}" class="pq-nav-link">Dashboard</a>
+            <a href="{% url 'portfolio_list' %}" class="pq-nav-link">Portfolios</a>
+            <a href="{% url 'market' %}" class="pq-nav-link">Market</a>
+            <a href="{% url 'watchlist' %}" class="pq-nav-link">Watchlist</a>
+            <a href="{% url 'alerts' %}" class="pq-nav-link">Alerts</a>
+            <a href="{% url 'news' %}" class="pq-nav-link">News</a>
+
+            <!-- Analytics Dropdown -->
+            <div class="pq-nav-dropdown" id="analyticsDropdown">
+                <button class="pq-nav-dropdown-btn" onclick="toggleNavDropdown('analyticsDropdown')">
+                    <i class="bi bi-cpu me-1"></i> Analytics
+                    <i class="bi bi-chevron-down chevron"></i>
+                </button>
+                <div class="pq-nav-dropdown-menu">
+                    <div class="menu-label">Insights</div>
+                    <a href="{% url 'intelligence' %}"><i class="bi bi-lightbulb" style="color:#5856d6;"></i> Portfolio Intelligence</a>
+                    <a href="{% url 'heatmap' %}"><i class="bi bi-grid-3x3" style="color:#ff9500;"></i> Market Heatmap</a>
+                    <a href="{% url 'sector_rotation' %}"><i class="bi bi-pie-chart" style="color:#ff9500;"></i> Sector Rotation</a>
+                    <div class="menu-divider"></div>
+                    <div class="menu-label">Risk & Stats</div>
+                    <a href="{% url 'portfolio_beta' %}"><i class="bi bi-activity" style="color:#c4162a;"></i> Portfolio Beta</a>
+                    <a href="{% url 'volatility_chart' %}"><i class="bi bi-activity" style="color:#ff9500;"></i> Volatility Chart</a>
+                    <a href="{% url 'monte_carlo' %}"><i class="bi bi-dice-5" style="color:#5856d6;"></i> Monte Carlo</a>
+                    <a href="{% url 'efficient_frontier' %}"><i class="bi bi-graph-up-arrow" style="color:#1c7f3e;"></i> Efficient Frontier</a>
+                    <div class="menu-divider"></div>
+                    <div class="menu-label">Market Intel</div>
+                    <a href="{% url 'ipo_tracker' %}"><i class="bi bi-rocket" style="color:#5856d6;"></i> IPO Tracker</a>
+                    <a href="{% url 'insider_trading' %}"><i class="bi bi-person-badge" style="color:#ff9500;"></i> Insider Trading</a>
+                    <a href="{% url 'economic_calendar' %}">
+    <i class="bi bi-calendar-event" style="color:#0071e3;"></i> Economic Calendar
+</a>
+<a href="{% url 'market_mood' %}">
+    <i class="bi bi-emoji-smile" style="color:#ff9500;"></i> Market Mood Ring
+</a>
+<a href="{% url 'earnings_calendar' %}">
+    <i class="bi bi-calendar-check" style="color:#1c7f3e;"></i> Earnings Calendar
+</a>
+<a href="{% url 'short_squeeze' %}">
+    <i class="bi bi-lightning-charge" style="color:#ff9500;"></i> Short Squeeze
+</a>
+<a href="{% url 'famous_investors' %}">
+    <i class="bi bi-trophy" style="color:#b36200;"></i> Famous Investors
+</a>
+<a href="{% url 'crisis_sim' %}">
+    <i class="bi bi-exclamation-triangle" style="color:#c4162a;"></i> Crisis Simulator
+</a>
+                </div>
+            </div>
+
+            <!-- Tools Dropdown -->
+            <div class="pq-nav-dropdown" id="toolsDropdown">
+                <button class="pq-nav-dropdown-btn" onclick="toggleNavDropdown('toolsDropdown')">
+                    <i class="bi bi-tools me-1"></i> Tools
+                    <i class="bi bi-chevron-down chevron"></i>
+                </button>
+                <div class="pq-nav-dropdown-menu">
+                    <div class="menu-label">Simulators</div>
+                    <a href="{% url 'whatif' %}"><i class="bi bi-calculator" style="color:#0071e3;"></i> What-If Simulator</a>
+                    <a href="{% url 'regret' %}"><i class="bi bi-arrow-left-right" style="color:#c4162a;"></i> Regret Calculator</a>
+                    <a href="{% url 'dca_planner' %}"><i class="bi bi-calendar-check" style="color:#0071e3;"></i> DCA Planner</a>
+                    <div class="menu-divider"></div>
+                    <div class="menu-label">Analysis</div>
+                    <a href="{% url 'breakeven' %}"><i class="bi bi-bar-chart" style="color:#1c7f3e;"></i> Break-Even</a>
+                    <a href="{% url 'portfolio_comparison' %}"><i class="bi bi-layout-split" style="color:#5856d6;"></i> Portfolio Compare</a>
+                    <div class="menu-divider"></div>
+                    <div class="menu-label">Trackers</div>
+                    <a href="{% url 'dividend_tracker' %}"><i class="bi bi-cash-coin" style="color:#1c7f3e;"></i> Dividend Tracker</a>
+                    <a href="{% url 'price_targets' %}"><i class="bi bi-bullseye" style="color:#c4162a;"></i> Price Targets</a>
+                </div>
+            </div>
+
+            <!-- Turkey Dropdown -->
+            <div class="pq-nav-dropdown" id="turkeyDropdown">
+                <button class="pq-nav-dropdown-btn" onclick="toggleNavDropdown('turkeyDropdown')">
+                    🇹🇷 Turkey
+                    <i class="bi bi-chevron-down chevron"></i>
+                </button>
+                <div class="pq-nav-dropdown-menu">
+                    <div class="menu-label">Türkiye</div>
+                    <a href="{% url 'bist_market' %}"><i class="bi bi-building" style="color:#c4162a;"></i> BIST Market</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pq-nav-right">
+        <button id="mobileMenuBtn" class="btn-icon" onclick="toggleMobileMenu()" style="display:none;">
+            <i class="bi bi-list" id="menuIcon" style="font-size:18px;"></i>
+        </button>
+        <button id="darkToggle" onclick="toggleDark()" class="btn-icon" title="Toggle dark mode">
+            <i class="bi bi-moon" id="darkIcon"></i>
+        </button>
+        <div class="dropdown">
+            <div class="pq-avatar" data-bs-toggle="dropdown">
+                {{ user.username|first|upper }}
+            </div>
+            <ul class="dropdown-menu pq-dropdown dropdown-menu-end mt-1">
+                <li><span class="pq-dropdown-item text-muted" style="cursor:default">{{ user.username }}</span></li>
+                <li><hr style="margin:4px 0;border-color:rgba(0,0,0,0.08)"></li>
+                <li><a class="pq-dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a></li>
+                <li><hr style="margin:4px 0;border-color:rgba(0,0,0,0.08)"></li>
+                <li><a class="pq-dropdown-item danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a></li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</nav>
+
+{% if user.is_authenticated %}
+<!-- Mobile Menu -->
+<div id="mobileMenu" style="display:none;position:fixed;top:48px;left:0;right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.08);z-index:999;padding:8px 16px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.1);max-height:80vh;overflow-y:auto;">
+    <a href="{% url 'dashboard' %}" class="pq-mobile-link"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+    <a href="{% url 'portfolio_list' %}" class="pq-mobile-link"><i class="bi bi-briefcase me-2"></i> Portfolios</a>
+    <a href="{% url 'market' %}" class="pq-mobile-link"><i class="bi bi-graph-up me-2"></i> Market</a>
+    <a href="{% url 'watchlist' %}" class="pq-mobile-link"><i class="bi bi-eye me-2"></i> Watchlist</a>
+    <a href="{% url 'alerts' %}" class="pq-mobile-link"><i class="bi bi-bell me-2"></i> Alerts</a>
+    <a href="{% url 'news' %}" class="pq-mobile-link"><i class="bi bi-newspaper me-2"></i> News</a>
+    <div class="pq-mobile-section">Analytics</div>
+    <a href="{% url 'intelligence' %}" class="pq-mobile-link"><i class="bi bi-lightbulb me-2"></i> Portfolio Intelligence</a>
+    <a href="{% url 'heatmap' %}" class="pq-mobile-link"><i class="bi bi-grid-3x3 me-2"></i> Market Heatmap</a>
+    <a href="{% url 'sector_rotation' %}" class="pq-mobile-link"><i class="bi bi-pie-chart me-2"></i> Sector Rotation</a>
+    <a href="{% url 'portfolio_beta' %}" class="pq-mobile-link"><i class="bi bi-activity me-2"></i> Portfolio Beta</a>
+    <a href="{% url 'volatility_chart' %}" class="pq-mobile-link"><i class="bi bi-activity me-2"></i> Volatility Chart</a>
+    <a href="{% url 'monte_carlo' %}" class="pq-mobile-link"><i class="bi bi-dice-5 me-2"></i> Monte Carlo</a>
+    <a href="{% url 'efficient_frontier' %}" class="pq-mobile-link"><i class="bi bi-graph-up-arrow me-2"></i> Efficient Frontier</a>
+    <a href="{% url 'ipo_tracker' %}" class="pq-mobile-link"><i class="bi bi-rocket me-2"></i> IPO Tracker</a>
+    <a href="{% url 'insider_trading' %}" class="pq-mobile-link"><i class="bi bi-person-badge me-2"></i> Insider Trading</a>
+    <a href="{% url 'economic_calendar' %}" class="pq-mobile-link"><i class="bi bi-calendar-event me-2"></i> Economic Calendar</a>
+    <a href="{% url 'market_mood' %}" class="pq-mobile-link"><i class="bi bi-emoji-smile me-2"></i> Market Mood Ring</a>
+    <a href="{% url 'earnings_calendar' %}" class="pq-mobile-link"><i class="bi bi-calendar-check me-2"></i> Earnings Calendar</a>
+    <a href="{% url 'short_squeeze' %}" class="pq-mobile-link"><i class="bi bi-lightning-charge me-2"></i> Short Squeeze</a>
+    <a href="{% url 'famous_investors' %}" class="pq-mobile-link"><i class="bi bi-trophy me-2"></i> Famous Investors</a>
+    <a href="{% url 'crisis_sim' %}" class="pq-mobile-link"><i class="bi bi-exclamation-triangle me-2"></i> Crisis Simulator</a>
+    <div class="pq-mobile-section">Tools</div>
+    <a href="{% url 'whatif' %}" class="pq-mobile-link"><i class="bi bi-calculator me-2"></i> What-If Simulator</a>
+    <a href="{% url 'regret' %}" class="pq-mobile-link"><i class="bi bi-arrow-left-right me-2"></i> Regret Calculator</a>
+    <a href="{% url 'breakeven' %}" class="pq-mobile-link"><i class="bi bi-bar-chart me-2"></i> Break-Even</a>
+    <a href="{% url 'dca_planner' %}" class="pq-mobile-link"><i class="bi bi-calendar-check me-2"></i> DCA Planner</a>
+    <a href="{% url 'dividend_tracker' %}" class="pq-mobile-link"><i class="bi bi-cash-coin me-2"></i> Dividend Tracker</a>
+    <a href="{% url 'price_targets' %}" class="pq-mobile-link"><i class="bi bi-bullseye me-2"></i> Price Targets</a>
+    <a href="{% url 'portfolio_comparison' %}" class="pq-mobile-link"><i class="bi bi-layout-split me-2"></i> Portfolio Compare</a>
+    <div class="pq-mobile-section">🇹🇷 Turkey</div>
+    <a href="{% url 'bist_market' %}" class="pq-mobile-link"><i class="bi bi-building me-2"></i> BIST Market</a>
+    <a href="{% url 'logout' %}" class="pq-mobile-link" style="color:#c4162a;margin-top:8px;border-top:1px solid rgba(0,0,0,0.08);"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a>
+</div>
+
+<!-- Onboarding -->
+<div id="onboardingOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;backdrop-filter:blur(4px);display:none;"></div>
+<div id="onboardingModal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;width:90%;max-width:480px;display:none;">
+    <div class="pq-card p-5 text-center" style="box-shadow:0 32px 80px rgba(0,0,0,0.3);">
+        <div id="onboardingContent"></div>
+        <div style="display:flex;justify-content:center;gap:6px;margin-top:24px;" id="onboardingDots"></div>
+        <div style="display:flex;gap:12px;margin-top:20px;justify-content:center;">
+            <button onclick="skipOnboarding()" class="btn-apple-secondary">Skip</button>
+            <button id="onboardingNext" onclick="nextOnboardingStep()" class="btn-apple">Next →</button>
+        </div>
+    </div>
+</div>
+
+<!-- Live Ticker -->
+<div id="liveTicker" style="background:#1d1d1f;color:#f5f5f7;height:32px;overflow:hidden;position:relative;display:flex;align-items:center;">
+    <div style="flex-shrink:0;padding:0 16px;font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:1px;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap;">
+        LIVE <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#34c759;margin-left:4px;animation:pulse-dot 1.5s infinite;"></span>
+    </div>
+    <div style="overflow:hidden;flex:1;">
+        <div id="tickerTrack" style="display:flex;gap:0;white-space:nowrap;will-change:transform;"></div>
+    </div>
+</div>
+{% endif %}
+
+{% if messages %}
+<div style="max-width:960px;margin:16px auto;padding:0 24px;">
+    {% for message in messages %}
+    <div class="alert pq-alert alert-{{ message.tags }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleDark() {
+    const body = document.body;
+    const icon = document.getElementById('darkIcon');
+    if (body.classList.contains('dark')) {
+        body.classList.remove('dark');
+        icon.className = 'bi bi-moon';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.classList.add('dark');
+        icon.className = 'bi bi-sun';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+(function() {
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+        const icon = document.getElementById('darkIcon');
+        if (icon) icon.className = 'bi bi-sun';
+    }
+})();
+(function() {
+    const path = window.location.pathname;
+    document.querySelectorAll('.pq-nav-link').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && path.startsWith(href) && href !== '/') link.classList.add('active');
+        else if (href === '/' && path === '/') link.classList.add('active');
+    });
+    document.querySelectorAll('.pq-nav-dropdown-menu a').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && path.startsWith(href)) {
+            link.closest('.pq-nav-dropdown')?.querySelector('.pq-nav-dropdown-btn')?.classList.add('active');
+        }
+    });
+})();
+function toggleNavDropdown(id) {
+    const dropdown = document.getElementById(id);
+    document.querySelectorAll('.pq-nav-dropdown').forEach(d => { if (d.id !== id) d.classList.remove('open'); });
+    dropdown.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.pq-nav-dropdown')) {
+        document.querySelectorAll('.pq-nav-dropdown').forEach(d => d.classList.remove('open'));
+    }
+});
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const icon = document.getElementById('menuIcon');
+    if (!menu) return;
+    const isOpen = menu.style.display === 'block';
+    menu.style.display = isOpen ? 'none' : 'block';
+    icon.className = isOpen ? 'bi bi-list' : 'bi bi-x';
+}
+document.addEventListener('click', e => {
+    const menu = document.getElementById('mobileMenu');
+    const btn = document.getElementById('mobileMenuBtn');
+    if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.style.display = 'none';
+        const icon = document.getElementById('menuIcon');
+        if (icon) icon.className = 'bi bi-list';
+    }
+});
+const onboardingSteps = [
+    { emoji: '👋', title: 'Welcome to PortfoliQ!', desc: 'Your personal investment portfolio tracker. Track stocks, crypto, gold and more — all in one place.' },
+    { emoji: '💼', title: 'Create a Portfolio', desc: 'Start by creating a portfolio. Add your assets and track their performance in real-time.' },
+    { emoji: '📊', title: 'Live Market Data', desc: 'Get real-time prices, news, and market insights. The live ticker keeps you updated at all times.' },
+    { emoji: '🧠', title: 'Portfolio Intelligence', desc: 'Discover your investor DNA, get smart rebalancing suggestions, and track your Fear & Greed index.' },
+    { emoji: '🚀', title: "You're all set!", desc: 'Start by creating your first portfolio. Happy investing!' },
+];
+let onboardingStep = 0;
+function renderOnboardingStep() {
+    const step = onboardingSteps[onboardingStep];
+    const content = document.getElementById('onboardingContent');
+    if (!content) return;
+    content.innerHTML = `
+        <div style="font-size:56px;margin-bottom:16px;">${step.emoji}</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;">${step.title}</div>
+        <div style="font-size:15px;color:#6e6e73;line-height:1.6;">${step.desc}</div>
+    `;
+    const dots = document.getElementById('onboardingDots');
+    if (dots) {
+        dots.innerHTML = onboardingSteps.map((_, i) =>
+            `<div style="width:${i === onboardingStep ? '20px' : '8px'};height:8px;border-radius:4px;background:${i === onboardingStep ? '#0071e3' : 'rgba(0,0,0,0.12)'};transition:all 0.3s ease;"></div>`
+        ).join('');
+    }
+    const btn = document.getElementById('onboardingNext');
+    if (btn) btn.textContent = onboardingStep === onboardingSteps.length - 1 ? "Let's go! 🚀" : 'Next →';
+}
+function nextOnboardingStep() {
+    if (onboardingStep < onboardingSteps.length - 1) { onboardingStep++; renderOnboardingStep(); }
+    else { skipOnboarding(); }
+}
+function skipOnboarding() {
+    const overlay = document.getElementById('onboardingOverlay');
+    const modal = document.getElementById('onboardingModal');
+    if (overlay) overlay.style.display = 'none';
+    if (modal) modal.style.display = 'none';
+    localStorage.setItem('pq_onboarding_done', '1');
+    const csrfToken = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1] || '';
+    fetch('/onboarding/done/', { method: 'POST', headers: { 'X-CSRFToken': csrfToken } });
+}
+{% if show_onboarding %}
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('pq_onboarding_done') === '1') return;
+    const overlay = document.getElementById('onboardingOverlay');
+    const modal = document.getElementById('onboardingModal');
+    if (overlay && modal) {
+        overlay.style.display = 'block';
+        modal.style.display = 'block';
+        renderOnboardingStep();
+    }
+});
+{% endif %}
+let tickerLoaded = false;
+async function loadTicker() {
+    if (tickerLoaded) return;
+    try {
+        const r = await fetch('/ajax/ticker/');
+        const data = await r.json();
+        const track = document.getElementById('tickerTrack');
+        if (!track || !data.tickers.length) return;
+        const items = data.tickers.map(t => {
+            const changeClass = t.change >= 0 ? 'ticker-change-up' : 'ticker-change-down';
+            const changeSign = t.change >= 0 ? '+' : '';
+            const price = t.price < 10
+                ? t.price.toLocaleString('en-US', {minimumFractionDigits:4, maximumFractionDigits:4})
+                : t.price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+            return `<div class="ticker-item">
+                <span class="ticker-symbol">${t.symbol}</span>
+                <span class="ticker-price">$${price}</span>
+                <span class="${changeClass}">${changeSign}${t.change.toFixed(2)}%</span>
+            </div>`;
+        }).join('');
+        track.innerHTML = items + items + items;
+        tickerLoaded = true;
+        let offset = 0;
+        const speed = 0.4;
+        const singleWidth = track.scrollWidth / 3;
+        function animate() {
+            offset += speed;
+            if (offset >= singleWidth) offset = 0;
+            track.style.transform = `translateX(-${offset}px)`;
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+    } catch(e) {}
+}
+{% if user.is_authenticated %}
+loadTicker();
+{% endif %}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

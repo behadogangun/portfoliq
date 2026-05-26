@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Portfolios — PortfoliQ{% endblock %}
+
+{% block content %}
+<div style="max-width:960px;margin:0 auto;padding:40px 24px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="pq-page-title">Portfolios</div>
+        <a href="{% url 'portfolio_create' %}" class="btn-apple">
+            <i class="bi bi-plus me-1"></i> New Portfolio
+        </a>
+    </div>
+
+    <div class="pq-card p-3 mb-4">
+        <form method="get">
+            <div style="display:flex;gap:8px;">
+                <input type="text" name="q" class="pq-input" placeholder="Search portfolios..." value="{{ query }}" style="flex:1;">
+                <button type="submit" class="btn-apple-secondary" style="white-space:nowrap;">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-3">
+        {% for portfolio in portfolios %}
+        <div class="col-md-4">
+            <div class="pq-card p-4">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                    <div style="font-size:15px;font-weight:600;">{{ portfolio.name }}</div>
+                    <span class="pq-badge">{{ portfolio.assets.count }} assets</span>
+                </div>
+                {% if portfolio.description %}
+                <div style="font-size:13px;color:#6e6e73;margin-bottom:10px;">{{ portfolio.description|truncatechars:55 }}</div>
+                {% endif %}
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;">
+                    {{ portfolio.total_value|format_currency }}
+                </div>
+                <div style="font-size:12px;color:#6e6e73;margin-bottom:16px;">{{ portfolio.updated_at|date:"d M Y" }}</div>
+                <div style="display:flex;gap:8px;">
+                    <a href="{% url 'portfolio_detail' portfolio.pk %}" class="btn-apple" style="padding:6px 14px;font-size:13px;">View</a>
+                    <a href="{% url 'portfolio_update' portfolio.pk %}" class="btn-icon btn-icon-primary"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'portfolio_delete' portfolio.pk %}" class="btn-icon btn-icon-danger"><i class="bi bi-trash"></i></a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="pq-card p-5 text-center">
+                <i class="bi bi-search" style="font-size:36px;color:#c7c7cc;display:block;margin-bottom:12px;"></i>
+                <div style="font-size:15px;color:#6e6e73;">No portfolios found.</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if portfolios.has_other_pages %}
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:24px;">
+        {% if portfolios.has_previous %}
+        <a href="?page={{ portfolios.previous_page_number }}&q={{ query }}" class="btn-apple-secondary">← Previous</a>
+        {% endif %}
+        <span class="btn-apple-secondary" style="cursor:default;">{{ portfolios.number }} / {{ portfolios.paginator.num_pages }}</span>
+        {% if portfolios.has_next %}
+        <a href="?page={{ portfolios.next_page_number }}&q={{ query }}" class="btn-apple-secondary">Next →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Efficient Frontier — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:900px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Efficient Frontier</div>
+    <div class="pq-page-sub mb-4">Risk/return optimization — find the optimal portfolio allocation</div>
+
+    {% if result %}
+
+    <!-- Key Portfolios -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="pq-card p-4" style="border-top:3px solid #6e6e73;">
+                <div style="font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📍 Current Portfolio</div>
+                <div style="font-size:22px;font-weight:700;margin-bottom:4px;">{{ result.current.return|floatformat:1 }}%</div>
+                <div style="font-size:13px;color:#6e6e73;">Expected return</div>
+                <div style="font-size:18px;font-weight:600;margin-top:8px;">{{ result.current.risk|floatformat:1 }}%</div>
+                <div style="font-size:13px;color:#6e6e73;">Volatility</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4" style="border-top:3px solid #0071e3;">
+                <div style="font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">⭐ Max Sharpe Ratio</div>
+                <div style="font-size:22px;font-weight:700;color:#0071e3;margin-bottom:4px;">{{ result.best_sharpe.return|floatformat:1 }}%</div>
+                <div style="font-size:13px;color:#6e6e73;">Expected return</div>
+                <div style="font-size:18px;font-weight:600;margin-top:8px;">{{ result.best_sharpe.risk|floatformat:1 }}%</div>
+                <div style="font-size:13px;color:#6e6e73;">Volatility · Sharpe: {{ result.best_sharpe.sharpe }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4" style="border-top:3px solid #1c7f3e;">
+                <div style="font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🛡️ Min Risk Portfolio</div>
+                <div style="font-size:22px;font-weight:700;color:#1c7f3e;margin-bottom:4px;">{{ result.min_risk.return|floatformat:1 }}%</div>
+                <div style="font-size:13px;color:#6e6e73;">Expected return</div>
+                <div style="font-size:18px;font-weight:600;margin-top:8px;">{{ result.min_risk.risk|floatformat:1 }}%</div>
+                <div style="font-size:13px;color:#6e6e73;">Volatility (lowest)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scatter Chart -->
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Risk vs Return — {{ result.num_portfolios }} Portfolios</div>
+        <div style="font-size:13px;color:#6e6e73;margin-bottom:20px;">
+            Each dot = one random allocation. Color = Sharpe ratio (darker = better)
+        </div>
+        <canvas id="efChart" height="80"></canvas>
+    </div>
+
+    <!-- Optimal Weights -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="pq-card p-4">
+                <div style="font-size:15px;font-weight:600;margin-bottom:16px;">⭐ Max Sharpe Weights</div>
+                {% for symbol, weight in result.best_sharpe.weights.items %}
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+                        <span style="font-weight:500;">{{ symbol }}</span>
+                        <span style="color:#0071e3;font-weight:600;">{{ weight }}%</span>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.06);border-radius:4px;height:6px;overflow:hidden;">
+                        <div style="height:100%;width:{{ weight }}%;background:#0071e3;border-radius:4px;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="pq-card p-4">
+                <div style="font-size:15px;font-weight:600;margin-bottom:16px;">🛡️ Min Risk Weights</div>
+                {% for symbol, weight in result.min_risk.weights.items %}
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+                        <span style="font-weight:500;">{{ symbol }}</span>
+                        <span style="color:#1c7f3e;font-weight:600;">{{ weight }}%</span>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.06);border-radius:4px;height:6px;overflow:hidden;">
+                        <div style="height:100%;width:{{ weight }}%;background:#1c7f3e;border-radius:4px;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Info -->
+    <div class="pq-card p-4" style="background:rgba(0,113,227,0.03);border-left:3px solid #0071e3;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px;">💡 What is the Efficient Frontier?</div>
+        <div style="font-size:14px;color:#6e6e73;line-height:1.6;">
+            The Efficient Frontier (Markowitz, 1952) shows the set of portfolios that offer the highest expected return
+            for a given level of risk. Portfolios below the frontier are suboptimal — you can get more return
+            for the same risk, or less risk for the same return. The <strong>Max Sharpe</strong> portfolio
+            maximizes risk-adjusted return, while the <strong>Min Risk</strong> portfolio minimizes volatility.
+        </div>
+    </div>
+
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-graph-up-arrow" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;">Need at least 2 stocks</div>
+        <div style="font-size:14px;color:#6e6e73;">Add at least 2 stock holdings with price history to calculate the Efficient Frontier.</div>
+        <a href="{% url 'portfolio_list' %}" class="btn-apple" style="margin-top:16px;">View Portfolios</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% if result %}
+<script>
+window.addEventListener('load', function() {
+    const ctx = document.getElementById('efChart').getContext('2d');
+
+    const portfolios = {{ result.portfolios|safe }};
+    const best = {{ result.best_sharpe|safe }};
+    const minRisk = {{ result.min_risk|safe }};
+    const current = {{ result.current|safe }};
+
+    const maxSharpe = Math.max(...portfolios.map(p => p.sharpe));
+    const minSharpe = Math.min(...portfolios.map(p => p.sharpe));
+
+    const scatterData = portfolios.map(p => ({
+        x: p.risk,
+        y: p.return,
+        sharpe: p.sharpe,
+    }));
+
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Random Portfolios',
+                    data: scatterData,
+                    backgroundColor: portfolios.map(p => {
+                        const norm = (p.sharpe - minSharpe) / (maxSharpe - minSharpe);
+                        const r = Math.round(0 + (1 - norm) * 100);
+                        const g = Math.round(113 * norm);
+                        return `rgba(${r},${g},227,0.4)`;
+                    }),
+                    pointRadius: 3,
+                },
+                {
+                    label: 'Max Sharpe',
+                    data: [{ x: best.risk, y: best.return }],
+                    backgroundColor: '#0071e3',
+                    pointRadius: 10,
+                    pointStyle: 'star',
+                },
+                {
+                    label: 'Min Risk',
+                    data: [{ x: minRisk.risk, y: minRisk.return }],
+                    backgroundColor: '#1c7f3e',
+                    pointRadius: 10,
+                    pointStyle: 'triangle',
+                },
+                {
+                    label: 'Current Portfolio',
+                    data: [{ x: current.risk, y: current.return }],
+                    backgroundColor: '#ff9500',
+                    pointRadius: 10,
+                    pointStyle: 'rectRot',
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top', labels: { font: { size: 12 }, usePointStyle: true } },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const d = ctx.raw;
+                            return `Risk: ${d.x.toFixed(1)}% | Return: ${d.y.toFixed(1)}%`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Risk (Volatility %)', font: { size: 12 } },
+                    grid: { color: 'rgba(0,0,0,0.04)' },
+                },
+                y: {
+                    title: { display: true, text: 'Expected Return (%)', font: { size: 12 } },
+                    grid: { color: 'rgba(0,0,0,0.04)' },
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

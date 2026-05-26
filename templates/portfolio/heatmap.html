@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Market Heatmap — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:1200px;margin:0 auto;padding:40px 24px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="pq-page-title">Market Heatmap</div>
+            <div class="pq-page-sub">S&P 500 style — daily performance by sector</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;">
+            <div style="display:flex;gap:6px;align-items:center;">
+                <div style="width:12px;height:12px;border-radius:3px;background:#1c7f3e;"></div>
+                <span style="font-size:12px;color:#6e6e73;">Strong gain</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <div style="width:12px;height:12px;border-radius:3px;background:#34c759;"></div>
+                <span style="font-size:12px;color:#6e6e73;">Gain</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <div style="width:12px;height:12px;border-radius:3px;background:#6e6e73;"></div>
+                <span style="font-size:12px;color:#6e6e73;">Flat</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <div style="width:12px;height:12px;border-radius:3px;background:#ff453a;"></div>
+                <span style="font-size:12px;color:#6e6e73;">Loss</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <div style="width:12px;height:12px;border-radius:3px;background:#c4162a;"></div>
+                <span style="font-size:12px;color:#6e6e73;">Strong loss</span>
+            </div>
+        </div>
+    </div>
+
+    {% for sector_data in heatmap_data %}
+    {% if sector_data.stocks %}
+    <div class="mb-4">
+        <div style="font-size:13px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
+            {{ sector_data.sector }}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:4px;">
+            {% for stock in sector_data.stocks %}
+            <div id="heatmap-cell" style="
+                border-radius:10px;
+                padding:12px 10px;
+                text-align:center;
+                cursor:pointer;
+                transition:transform 0.15s,box-shadow 0.15s;
+                background:{% if stock.change >= 3 %}#1c7f3e{% elif stock.change >= 1 %}#34c759{% elif stock.change >= 0 %}#2d9e4f{% elif stock.change >= -1 %}#ff6b6b{% elif stock.change >= -3 %}#ff453a{% else %}#c4162a{% endif %};
+                color:white;
+                "
+                onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.2)'"
+                onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none'"
+                title="{{ stock.name }} — ${{ stock.price }}">
+                <div style="font-size:13px;font-weight:700;margin-bottom:2px;">{{ stock.symbol }}</div>
+                <div style="font-size:11px;opacity:0.85;margin-bottom:4px;">{{ stock.name|truncatechars:10 }}</div>
+                <div style="font-size:14px;font-weight:600;">
+                    {% if stock.change >= 0 %}+{% endif %}{{ stock.change|floatformat:2 }}%
+                </div>
+                <div style="font-size:10px;opacity:0.75;margin-top:2px;">${{ stock.price }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    {% if not heatmap_data %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-grid-3x3" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;">Could not load market data</div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

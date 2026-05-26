@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}{{ asset.symbol }} — PortfoliQ{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;margin:0 auto;padding:40px 24px;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
+        {% if asset.logo %}
+        <img src="{{ asset.logo }}" style="width:56px;height:56px;border-radius:16px;object-fit:contain;background:#f5f5f7;padding:6px;">
+        {% else %}
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#0071e3;">
+            {{ asset.symbol|slice:":2" }}
+        </div>
+        {% endif %}
+        <div>
+            <div style="font-size:28px;font-weight:700;letter-spacing:-0.5px;">{{ asset.symbol }}</div>
+            <div style="font-size:15px;color:#6e6e73;">{{ asset.name }} · {{ asset.get_asset_type_display }}</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+            <div style="font-size:28px;font-weight:700;">{{ asset.current_value|format_currency }}</div>
+            <div style="font-size:14px;" class="{% if asset.profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+                {% if asset.profit_loss >= 0 %}+{% endif %}{{ asset.profit_loss_percent|floatformat:2 }}% all time
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Quantity</div>
+                <div style="font-size:20px;font-weight:700;">{{ asset.quantity|format_quantity }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Avg Cost</div>
+                <div style="font-size:20px;font-weight:700;">{{ asset.avg_buy_price|format_price }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Total Cost</div>
+                <div style="font-size:20px;font-weight:700;">{{ asset.total_cost|format_currency }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">P&L</div>
+                <div style="font-size:20px;font-weight:700;" class="{% if asset.profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+                    {% if asset.profit_loss >= 0 %}+{% endif %}{{ asset.profit_loss|format_currency }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Price History Chart -->
+    {% if price_values %}
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Price History</div>
+        <canvas id="priceChart" height="80"></canvas>
+    </div>
+    {% endif %}
+
+    <!-- Risk Metrics -->
+    {% if risk %}
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Risk Analysis</div>
+        <div style="font-size:13px;color:#6e6e73;margin-bottom:20px;">Based on price history</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+
+            <div style="background:#f5f5f7;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Sharpe Ratio</div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;
+                    color:{% if risk.sharpe_ratio >= 1 %}#1c7f3e{% elif risk.sharpe_ratio >= 0 %}#ff9500{% else %}#c4162a{% endif %}">
+                    {{ risk.sharpe_ratio }}
+                </div>
+                <div style="font-size:11px;color:#6e6e73;margin-top:4px;">
+                    {% if risk.sharpe_ratio >= 2 %}Excellent{% elif risk.sharpe_ratio >= 1 %}Good{% elif risk.sharpe_ratio >= 0 %}Fair{% else %}Poor{% endif %}
+                </div>
+            </div>
+
+            <div style="background:#f5f5f7;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Volatility</div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;
+                    color:{% if risk.volatility <= 20 %}#1c7f3e{% elif risk.volatility <= 50 %}#ff9500{% else %}#c4162a{% endif %}">
+                    {{ risk.volatility }}%
+                </div>
+                <div style="font-size:11px;color:#6e6e73;margin-top:4px;">Annual</div>
+            </div>
+
+            <div style="background:#f5f5f7;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Max Drawdown</div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#c4162a;">
+                    -{{ risk.max_drawdown }}%
+                </div>
+                <div style="font-size:11px;color:#6e6e73;margin-top:4px;">Peak to trough</div>
+            </div>
+
+            <div style="background:#f5f5f7;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Total Return</div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;"
+                     class="{% if risk.total_return >= 0 %}profit{% else %}loss{% endif %}">
+                    {% if risk.total_return >= 0 %}+{% endif %}{{ risk.total_return }}%
+                </div>
+                <div style="font-size:11px;color:#6e6e73;margin-top:4px;">Since tracking</div>
+            </div>
+
+        </div>
+
+        <!-- Sharpe Ratio açıklaması -->
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(0,113,227,0.04);border-radius:10px;border-left:3px solid #0071e3;">
+            <div style="font-size:13px;color:#6e6e73;line-height:1.5;">
+                <strong style="color:#1d1d1f;">Sharpe Ratio</strong> measures risk-adjusted return.
+                Above 1.0 is good, above 2.0 is excellent. Negative means the asset underperforms the risk-free rate.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- News -->
+    {% if news %}
+    <div class="pq-card mb-4">
+        <div style="padding:16px 20px;border-bottom:1px solid rgba(0,0,0,0.06);font-size:15px;font-weight:600;">
+            📰 Latest News
+        </div>
+        {% for article in news %}
+        <a href="{{ article.url }}" target="_blank" style="text-decoration:none;color:inherit;">
+            <div style="display:flex;gap:16px;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,0.04);transition:background 0.1s;"
+                 onmouseover="this.style.background='rgba(0,0,0,0.015)'"
+                 onmouseout="this.style.background='transparent'">
+                {% if article.image %}
+                <img src="{{ article.image }}" style="width:80px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0;"
+                     onerror="this.style.display='none'">
+                {% endif %}
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.4;">
+                        {{ article.title|truncatechars:100 }}
+                    </div>
+                    {% if article.description %}
+                    <div style="font-size:13px;color:#6e6e73;line-height:1.4;margin-bottom:6px;">
+                        {{ article.description|truncatechars:120 }}
+                    </div>
+                    {% endif %}
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <span style="font-size:12px;font-weight:500;color:#0071e3;">{{ article.source }}</span>
+                        <span style="font-size:12px;color:#6e6e73;">{{ article.published_at|slice:":10" }}</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Transactions -->
+    <div class="pq-card">
+        <div style="padding:16px 20px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:15px;font-weight:600;">Transactions</div>
+            <a href="{% url 'transaction_create' asset.pk %}" class="btn-apple" style="padding:6px 14px;font-size:13px;">
+                <i class="bi bi-plus me-1"></i> Add
+            </a>
+        </div>
+        <table class="pq-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th style="text-align:right;">Quantity</th>
+                    <th style="text-align:right;">Price</th>
+                    <th style="text-align:right;">Total</th>
+                    <th>Date</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td>
+                        {% if tx.transaction_type == 'buy' %}
+                        <span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:980px;background:rgba(28,127,62,0.1);color:#1c7f3e;">BUY</span>
+                        {% else %}
+                        <span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:980px;background:rgba(196,22,42,0.1);color:#c4162a;">SELL</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align:right;font-size:13px;">{{ tx.quantity }}</td>
+                    <td style="text-align:right;font-size:13px;">{{ tx.price|format_price }}</td>
+                    <td style="text-align:right;font-size:13px;font-weight:600;">{{ tx.total_amount|format_currency }}</td>
+                    <td style="font-size:13px;color:#6e6e73;">{{ tx.date|date:"d M Y, H:i" }}</td>
+                    <td style="font-size:13px;color:#6e6e73;">{{ tx.note|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:32px;color:#6e6e73;">
+                        No transactions yet.
+                        <a href="{% url 'transaction_create' asset.pk %}" style="color:#0071e3;text-decoration:none;">Add one</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:16px;">
+        <a href="{% url 'portfolio_detail' asset.portfolio.pk %}" class="btn-apple-secondary">
+            ← Back to {{ asset.portfolio.name }}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% if price_values %}
+<script>
+const ctx = document.getElementById('priceChart').getContext('2d');
+const labels = {{ price_labels|safe }};
+const values = {{ price_values|safe }};
+const positive = values[values.length-1] >= values[0];
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            data: values,
+            borderColor: positive ? '#1c7f3e' : '#c4162a',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: positive ? '#1c7f3e' : '#c4162a',
+            tension: 0.4,
+            fill: true,
+            backgroundColor: positive ? 'rgba(28,127,62,0.06)' : 'rgba(196,22,42,0.06)',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits:2})
+                }
+            }
+        },
+        scales: {
+            x: { grid: { display: false } },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: { callback: val => '$' + val.toLocaleString('en-US', {minimumFractionDigits:2}) }
+            }
+        }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

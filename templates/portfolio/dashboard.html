@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — PortfoliQ{% endblock %}
+{% load filters %}
+{% if show_onboarding %}
+{% with show_onboarding=True %}
+{% endwith %}
+{% endif %}
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;padding:40px 24px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="pq-page-title">Welcome back, {{ request.user.first_name|default:request.user.username }} 👋</div>
+            <div class="pq-page-sub">Here's your portfolio overview</div>
+        </div>
+        <a href="{% url 'portfolio_create' %}" class="btn-apple">
+            <i class="bi bi-plus me-1"></i> New Portfolio
+        </a>
+    </div>
+
+    <!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="pq-card p-4" style="border-top:3px solid #0071e3;">
+            <div style="font-size:12px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Total Value</div>
+            <div class="stat-card-value">{{ total_value|format_currency }}</div>
+            <div style="font-size:12px;color:#6e6e73;margin-top:6px;">All portfolios</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="pq-card p-4" style="border-top:3px solid #6e6e73;">
+            <div style="font-size:12px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Total Cost</div>
+            <div class="stat-card-value">{{ total_cost|format_currency }}</div>
+            <div style="font-size:12px;color:#6e6e73;margin-top:6px;">Invested amount</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="pq-card p-4" style="border-top:3px solid {% if total_pl >= 0 %}#1c7f3e{% else %}#c4162a{% endif %};">
+            <div style="font-size:12px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">P&L</div>
+            <div class="stat-card-value {% if total_pl >= 0 %}profit{% else %}loss{% endif %}">
+                {% if total_pl >= 0 %}+{% endif %}{{ total_pl|format_currency }}
+            </div>
+            <div style="font-size:12px;color:#6e6e73;margin-top:6px;">Unrealized gain/loss</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="pq-card p-4" style="border-top:3px solid {% if total_pl_percent >= 0 %}#1c7f3e{% else %}#c4162a{% endif %};">
+            <div style="font-size:12px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Return</div>
+            <div class="stat-card-value {% if total_pl_percent >= 0 %}profit{% else %}loss{% endif %}">
+                {% if total_pl_percent >= 0 %}+{% endif %}{{ total_pl_percent|floatformat:2 }}%
+            </div>
+            <div style="font-size:12px;color:#6e6e73;margin-top:6px;">All time return</div>
+        </div>
+    </div>
+</div>
+
+    <!-- Performance Chart + Allocation -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-8">
+            <div class="pq-card p-4">
+                <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Portfolio Performance</div>
+                {% if perf_values %}
+                <canvas id="perfChart" height="80"></canvas>
+                {% else %}
+                <div style="text-align:center;padding:40px 0;color:#6e6e73;">
+                    <i class="bi bi-graph-up" style="font-size:36px;color:#c7c7cc;display:block;margin-bottom:12px;"></i>
+                    Refresh prices to build performance history.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4 h-100">
+                <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Allocation</div>
+                {% if all_assets %}
+                <canvas id="allocationChart"></canvas>
+                {% else %}
+                <div style="text-align:center;padding:40px 0;color:#6e6e73;">
+                    <i class="bi bi-pie-chart" style="font-size:36px;color:#c7c7cc;display:block;margin-bottom:12px;"></i>
+                    No assets yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Best / Worst Performers -->
+    {% if best_performers %}
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="pq-card p-4">
+                <div style="font-size:15px;font-weight:600;margin-bottom:16px;">
+                    🏆 Best Performers
+                </div>
+                {% for asset, pl_percent in best_performers %}
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        {% if asset.logo %}
+                        <img src="{{ asset.logo }}" style="width:32px;height:32px;border-radius:8px;object-fit:contain;background:#f5f5f7;padding:2px;">
+                        {% else %}
+                        <div style="width:32px;height:32px;border-radius:8px;background:rgba(28,127,62,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1c7f3e;">
+                            {{ asset.symbol|slice:":2" }}
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div style="font-size:14px;font-weight:600;">{{ asset.symbol }}</div>
+                            <div style="font-size:12px;color:#6e6e73;">{{ asset.name|truncatechars:18 }}</div>
+                        </div>
+                    </div>
+                    <span style="font-size:14px;font-weight:600;color:#1c7f3e;">+{{ pl_percent|floatformat:2 }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="pq-card p-4">
+                <div style="font-size:15px;font-weight:600;margin-bottom:16px;">
+                    📉 Worst Performers
+                </div>
+                {% for asset, pl_percent in worst_performers %}
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        {% if asset.logo %}
+                        <img src="{{ asset.logo }}" style="width:32px;height:32px;border-radius:8px;object-fit:contain;background:#f5f5f7;padding:2px;">
+                        {% else %}
+                        <div style="width:32px;height:32px;border-radius:8px;background:rgba(196,22,42,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#c4162a;">
+                            {{ asset.symbol|slice:":2" }}
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div style="font-size:14px;font-weight:600;">{{ asset.symbol }}</div>
+                            <div style="font-size:12px;color:#6e6e73;">{{ asset.name|truncatechars:18 }}</div>
+                        </div>
+                    </div>
+                    <span style="font-size:14px;font-weight:600;color:#c4162a;">{{ pl_percent|floatformat:2 }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Portfolio List + -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-12">
+            <div class="pq-card p-4">
+                <div style="font-size:15px;font-weight:600;margin-bottom:16px;">My Portfolios</div>
+                {% for portfolio in portfolios %}
+                <div onclick="window.location='{% url 'portfolio_detail' portfolio.pk %}'"
+                     style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.05);cursor:pointer;transition:opacity 0.1s;"
+                     onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#0071e3,#34aadc);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:14px;font-weight:600;">{{ portfolio.name }}</div>
+                            <div style="font-size:12px;color:#6e6e73;">{{ portfolio.assets.count }} assets</div>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:15px;font-weight:700;">{{ portfolio.total_value|format_currency }}</div>
+                        <div style="font-size:12px;color:#6e6e73;">{{ portfolio.updated_at|date:"d M Y" }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align:center;padding:40px 0;color:#6e6e73;">
+                    <i class="bi bi-briefcase" style="font-size:36px;color:#c7c7cc;display:block;margin-bottom:12px;"></i>
+                    No portfolios yet.
+                    <a href="{% url 'portfolio_create' %}" style="color:#0071e3;text-decoration:none;"> Create one</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- All Assets Table -->
+    {% if all_assets %}
+    <div class="pq-card">
+        <div style="padding:16px 20px;border-bottom:1px solid rgba(0,0,0,0.06);font-size:15px;font-weight:600;">All Assets</div>
+        <table class="pq-table">
+            <thead>
+                <tr>
+                    <th>Asset</th>
+                    <th>Portfolio</th>
+                    <th style="text-align:right;">Quantity</th>
+                    <th style="text-align:right;">Avg Cost</th>
+                    <th style="text-align:right;">Current Value</th>
+                    <th style="text-align:right;">P&L</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asset in all_assets %}
+                <tr style="cursor:pointer;" onclick="window.location='{% url 'asset_detail' asset.pk %}'">
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            {% if asset.logo %}
+                            <img src="{{ asset.logo }}" style="width:32px;height:32px;border-radius:8px;object-fit:contain;background:#f5f5f7;padding:2px;">
+                            {% else %}
+                            <div style="width:32px;height:32px;border-radius:8px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0071e3;">
+                                {{ asset.symbol|slice:":2" }}
+                            </div>
+                            {% endif %}
+                            <div>
+                                <div style="font-size:14px;font-weight:600;">{{ asset.symbol }}</div>
+                                <div style="font-size:12px;color:#6e6e73;">{{ asset.name|truncatechars:20 }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-size:13px;color:#6e6e73;">{{ asset.portfolio.name }}</td>
+                    <td style="text-align:right;font-size:13px;">{{ asset.quantity|format_quantity }}</td>
+                    <td style="text-align:right;font-size:13px;">{{ asset.avg_buy_price|format_price }}</td>
+                    <td style="text-align:right;font-size:14px;font-weight:600;">{{ asset.current_value|format_currency }}</td>
+                    <td style="text-align:right;">
+                        <span style="font-size:13px;font-weight:500;" class="{% if asset.profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+                            {% if asset.profit_loss >= 0 %}+{% endif %}{{ asset.profit_loss_percent|floatformat:2 }}%
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+
+// Easter egg — confetti when profit > 10%
+(function() {
+    const plPercent = {{ total_pl_percent|floatformat:2 }};
+    if (plPercent <= 10) return;
+
+    function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+    function createConfetti() {
+        const colors = ['#0071e3','#34c759','#ff9500','#ff3b30','#5856d6','#34aadc','#ffcc00'];
+        for (let i = 0; i < 120; i++) {
+            setTimeout(() => {
+                const el = document.createElement('div');
+                const size = randomInRange(6, 12);
+                el.style.cssText = `position:fixed;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};left:${randomInRange(0,100)}vw;top:-20px;opacity:1;z-index:9999;pointer-events:none;transform:rotate(${randomInRange(0,360)}deg);`;
+                document.body.appendChild(el);
+                const duration = randomInRange(1800, 3200);
+                const endX = randomInRange(-150, 150);
+                el.animate([
+                    {transform:`translateY(0) translateX(0) rotate(0deg)`,opacity:1},
+                    {transform:`translateY(100vh) translateX(${endX}px) rotate(${randomInRange(360,720)}deg)`,opacity:0}
+                ], {duration, easing:'cubic-bezier(0.25,0.46,0.45,0.94)', fill:'forwards'}).onfinish = () => el.remove();
+            }, i * 18);
+        }
+    }
+
+    function showToast() {
+        const msgs = ["🚀 You're in profit! Nice work!","📈 Looking good! Keep it up!","💰 Your portfolio is crushing it!","🎯 That's what we call a good trade!","🔥 On fire! " + plPercent.toFixed(1) + "% return!"];
+        const toast = document.createElement('div');
+        toast.style.cssText = `position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:#1d1d1f;color:white;padding:14px 24px;border-radius:980px;font-size:15px;font-weight:500;z-index:10000;pointer-events:none;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s;opacity:0;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.2);`;
+        toast.textContent = msgs[Math.floor(Math.random()*msgs.length)];
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => requestAnimationFrame(() => { toast.style.transform='translateX(-50%) translateY(0)'; toast.style.opacity='1'; }));
+        setTimeout(() => { toast.style.transform='translateX(-50%) translateY(80px)'; toast.style.opacity='0'; setTimeout(()=>toast.remove(),400); }, 3500);
+    }
+
+    window.addEventListener('load', () => setTimeout(() => { createConfetti(); showToast(); }, 800));
+})();
+
+// Performance Chart
+{% if perf_values %}
+const perfCtx = document.getElementById('perfChart').getContext('2d');
+const perfLabels = {{ perf_labels|safe }};
+const perfValues = {{ perf_values|safe }};
+const perfPositive = perfValues.length > 1 && perfValues[perfValues.length-1] >= perfValues[0];
+
+new Chart(perfCtx, {
+    type: 'line',
+    data: {
+        labels: perfLabels,
+        datasets: [{
+            data: perfValues,
+            borderColor: perfPositive ? '#1c7f3e' : '#c4162a',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: perfPositive ? '#1c7f3e' : '#c4162a',
+            tension: 0.4,
+            fill: true,
+            backgroundColor: perfPositive ? 'rgba(28,127,62,0.06)' : 'rgba(196,22,42,0.06)',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => '$' + ctx.parsed.y.toLocaleString('en-US', {minimumFractionDigits:2})
+                }
+            }
+        },
+        scales: {
+            x: { grid: { display: false } },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: { callback: val => '$' + val.toLocaleString('en-US', {minimumFractionDigits:0}) }
+            }
+        }
+    }
+});
+{% endif %}
+
+// Allocation Chart
+{% if all_assets %}
+const ctx = document.getElementById('allocationChart').getContext('2d');
+const labels = [{% for asset in all_assets %}'{{ asset.symbol }}'{% if not forloop.last %},{% endif %}{% endfor %}];
+const values = [{% for asset in all_assets %}{{ asset.current_value|floatformat:2 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+const colors = ['#0071e3','#34aadc','#5856d6','#ff9500','#ff3b30','#34c759','#af52de','#ff2d55','#5ac8fa','#ffcc00'];
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: labels,
+        datasets: [{
+            data: values,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 0,
+            hoverOffset: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 12, usePointStyle: true } }
+        }
+    }
+});
+{% endif %}
+</script>
+{% if show_onboarding %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('onboardingOverlay').style.display = 'block';
+    document.getElementById('onboardingModal').style.display = 'block';
+});
+</script>
+{% endif %}
+{% endblock %}

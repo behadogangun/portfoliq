@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Portfolio Beta — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:900px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Portfolio Beta</div>
+    <div class="pq-page-sub mb-4">Measure how your portfolio moves relative to the S&P 500 market</div>
+
+    {% if beta_data %}
+
+    <!-- Portfolio Beta Score -->
+    <div class="pq-card p-5 mb-4 text-center" style="border-top:4px solid {{ beta_data.color }};">
+        <div style="font-size:13px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Portfolio Beta</div>
+        <div style="font-size:72px;font-weight:700;letter-spacing:-3px;color:{{ beta_data.color }};">
+            {{ beta_data.portfolio_beta }}
+        </div>
+        <div style="font-size:16px;color:#6e6e73;margin-top:8px;">{{ beta_data.interpretation }}</div>
+
+        <!-- Beta Scale -->
+        <div style="margin:24px auto;max-width:500px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#6e6e73;margin-bottom:6px;">
+                <span>Very Defensive</span>
+                <span>Market</span>
+                <span>Very Aggressive</span>
+            </div>
+            <div style="background:linear-gradient(90deg,#5856d6,#1c7f3e,#0071e3,#ff9500,#c4162a);border-radius:8px;height:10px;position:relative;">
+                {% with pos=beta_data.portfolio_beta %}
+                <div style="position:absolute;top:50%;transform:translate(-50%,-50%);left:{% if pos > 2 %}100{% elif pos < 0 %}0{% else %}{{ pos|floatformat:0 }}0{% endif %}%;width:16px;height:16px;border-radius:50%;background:white;border:3px solid {{ beta_data.color }};box-shadow:0 2px 8px rgba(0,0,0,0.2);"></div>
+                {% endwith %}
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#6e6e73;margin-top:6px;">
+                <span>β = 0</span>
+                <span>β = 1</span>
+                <span>β = 2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick explanation -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="pq-card p-3 text-center" style="border-top:3px solid #5856d6;">
+                <div style="font-size:22px;font-weight:700;color:#5856d6;">β &lt; 1</div>
+                <div style="font-size:13px;font-weight:600;margin:4px 0;">Defensive</div>
+                <div style="font-size:12px;color:#6e6e73;">Less volatile than market. Safer but lower upside.</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-3 text-center" style="border-top:3px solid #0071e3;">
+                <div style="font-size:22px;font-weight:700;color:#0071e3;">β = 1</div>
+                <div style="font-size:13px;font-weight:600;margin:4px 0;">Market</div>
+                <div style="font-size:12px;color:#6e6e73;">Moves exactly with the S&P 500.</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-3 text-center" style="border-top:3px solid #c4162a;">
+                <div style="font-size:22px;font-weight:700;color:#c4162a;">β &gt; 1</div>
+                <div style="font-size:13px;font-weight:600;margin:4px 0;">Aggressive</div>
+                <div style="font-size:12px;color:#6e6e73;">More volatile than market. Higher risk and reward.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asset Betas -->
+    <div class="pq-card p-4">
+        <div style="font-size:16px;font-weight:600;margin-bottom:16px;">Individual Asset Betas</div>
+        {% for item in beta_data.asset_betas %}
+        <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0071e3;flex-shrink:0;">
+                {{ item.symbol|slice:":3" }}
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:14px;font-weight:600;">{{ item.symbol }}</div>
+                <div style="font-size:12px;color:#6e6e73;">{{ item.name }} · Weight: {{ item.weight }}%</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:18px;font-weight:700;color:{{ item.color }};">β {{ item.beta }}</div>
+                <div style="font-size:11px;color:{{ item.color }};">{{ item.interpretation }}</div>
+            </div>
+            <div style="width:120px;">
+                <div style="background:rgba(0,0,0,0.06);border-radius:4px;height:6px;overflow:hidden;">
+                    <div style="height:100%;width:{% if item.beta > 2 %}100{% else %}{{ item.beta|floatformat:0 }}0{% endif %}%;background:{{ item.color }};border-radius:4px;transition:width 1s ease;"></div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% elif asset_count == 0 %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-activity" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;">No stock holdings found</div>
+        <div style="font-size:14px;color:#6e6e73;">Add stocks to your portfolio to calculate beta. Beta only applies to stocks, not crypto or gold.</div>
+        <a href="{% url 'portfolio_list' %}" class="btn-apple" style="margin-top:16px;">View Portfolios</a>
+    </div>
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-hourglass-split" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;">Could not calculate beta</div>
+        <div style="font-size:14px;color:#6e6e73;">Not enough price history available. Try again later.</div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}{{ portfolio.name }} — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width:1100px;margin:0 auto;padding:40px 24px;">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="pq-page-title">{{ portfolio.name }}</div>
+            {% if portfolio.description %}<div class="pq-page-sub">{{ portfolio.description }}</div>{% endif %}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button id="refreshBtn" class="btn-apple" onclick="refreshPrices()" style="background:#1c7f3e;">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh Prices
+            </button>
+            <a href="{% url 'asset_create' portfolio.pk %}" class="btn-apple">
+                <i class="bi bi-plus me-1"></i> Add Asset
+            </a>
+            <a href="{% url 'export_csv' portfolio.pk %}" class="btn-apple-secondary">
+                <i class="bi bi-filetype-csv me-1"></i> CSV
+            </a>
+            <a href="{% url 'export_pdf' portfolio.pk %}" class="btn-apple-secondary">
+                <i class="bi bi-file-pdf me-1"></i> PDF
+            </a>
+            <a href="{% url 'portfolio_card' portfolio.pk %}" class="btn-apple-secondary" target="_blank">
+    <i class="bi bi-share me-1"></i> Share Card
+</a>
+            <a href="{% url 'portfolio_update' portfolio.pk %}" class="btn-icon btn-icon-primary"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'portfolio_delete' portfolio.pk %}" class="btn-icon btn-icon-danger"><i class="bi bi-trash"></i></a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3" style="border-top:3px solid #0071e3;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Total Value</div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;">{{ total_value|format_currency }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3" style="border-top:3px solid #6e6e73;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Total Cost</div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;">{{ total_cost|format_currency }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3" style="border-top:3px solid {% if total_pl >= 0 %}#1c7f3e{% else %}#c4162a{% endif %};">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">P&L</div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;" class="{% if total_pl >= 0 %}profit{% else %}loss{% endif %}">
+                    {% if total_pl >= 0 %}+{% endif %}{{ total_pl|format_currency }}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3" style="border-top:3px solid {% if total_pl_percent >= 0 %}#1c7f3e{% else %}#c4162a{% endif %};">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Return</div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;" class="{% if total_pl_percent >= 0 %}profit{% else %}loss{% endif %}">
+                    {% if total_pl_percent >= 0 %}+{% endif %}{{ total_pl_percent|floatformat:2 }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assets Table + Allocation -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-7">
+            <div class="pq-card">
+                <div style="padding:16px 20px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;">
+                    <div style="font-size:15px;font-weight:600;">Assets</div>
+                    <span class="pq-badge">{{ assets|length }} assets</span>
+                </div>
+                <table class="pq-table" id="assetTable">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th style="text-align:right;">Qty</th>
+                            <th style="text-align:right;">Avg Cost</th>
+                            <th style="text-align:right;">Value</th>
+                            <th style="text-align:right;">P&L</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asset in assets %}
+                        <tr id="asset-row-{{ asset.id }}" style="cursor:pointer;"
+                            onmouseover="this.style.background='rgba(0,0,0,0.015)'"
+                            onmouseout="this.style.background='transparent'">
+                            <td onclick="window.location='{% url 'asset_detail' asset.pk %}'">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    {% if asset.logo %}
+                                    <img src="{{ asset.logo }}" style="width:36px;height:36px;border-radius:10px;object-fit:contain;background:#f5f5f7;padding:3px;" onerror="this.style.display='none'">
+                                    {% else %}
+                                    <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0071e3;">
+                                        {{ asset.symbol|slice:":2" }}
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div style="font-size:14px;font-weight:600;">{{ asset.symbol }}</div>
+                                        <div style="font-size:12px;color:#6e6e73;">{{ asset.name|truncatechars:18 }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="text-align:right;font-size:13px;" onclick="window.location='{% url 'asset_detail' asset.pk %}'">{{ asset.quantity|format_quantity }}</td>
+                            <td style="text-align:right;font-size:13px;" onclick="window.location='{% url 'asset_detail' asset.pk %}'">{{ asset.avg_buy_price|format_price }}</td>
+                            <td style="text-align:right;font-size:14px;font-weight:600;" id="value-{{ asset.id }}" onclick="window.location='{% url 'asset_detail' asset.pk %}'">
+                                {{ asset.current_value|format_currency }}
+                            </td>
+                            <td style="text-align:right;" id="pl-{{ asset.id }}" onclick="window.location='{% url 'asset_detail' asset.pk %}'">
+                                <span style="font-size:13px;font-weight:500;padding:3px 8px;border-radius:6px;
+                                    background:{% if asset.profit_loss >= 0 %}rgba(28,127,62,0.08){% else %}rgba(196,22,42,0.08){% endif %};"
+                                    class="{% if asset.profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+                                    {% if asset.profit_loss >= 0 %}+{% endif %}{{ asset.profit_loss_percent|floatformat:2 }}%
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:6px;justify-content:flex-end;">
+                                    <a href="{% url 'transaction_create' asset.pk %}" class="btn-icon btn-icon-primary">
+                                        <i class="bi bi-plus"></i>
+                                    </a>
+                                    <a href="{% url 'asset_delete' asset.pk %}" class="btn-icon btn-icon-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:48px;color:#6e6e73;">
+                                <i class="bi bi-briefcase" style="font-size:36px;color:#c7c7cc;display:block;margin-bottom:12px;"></i>
+                                No assets yet.
+                                <a href="{% url 'asset_create' portfolio.pk %}" style="color:#0071e3;text-decoration:none;">Add one</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="pq-card p-4" style="height:100%;">
+                <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Allocation</div>
+                <div style="font-size:13px;color:#6e6e73;margin-bottom:20px;">Portfolio breakdown by asset</div>
+                {% if assets %}
+                <canvas id="allocationChart" style="max-height:280px;"></canvas>
+                <!-- Asset list with percentage -->
+                <div style="margin-top:20px;">
+                    {% for asset in assets %}
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            {% if asset.logo %}
+                            <img src="{{ asset.logo }}" style="width:24px;height:24px;border-radius:6px;object-fit:contain;background:#f5f5f7;padding:2px;" onerror="this.style.display='none'">
+                            {% endif %}
+                            <span style="font-size:13px;font-weight:600;">{{ asset.symbol }}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:13px;font-weight:600;">{{ asset.current_value|format_currency }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align:center;padding:60px 0;color:#6e6e73;">
+                    <i class="bi bi-pie-chart" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:12px;"></i>
+                    No assets yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    refreshPrices();
+    setInterval(refreshPrices, 60000);
+});
+
+{% if assets %}
+const ctx = document.getElementById('allocationChart').getContext('2d');
+const labels = [{% for asset in assets %}'{{ asset.symbol }}'{% if not forloop.last %},{% endif %}{% endfor %}];
+const values = [{% for asset in assets %}{{ asset.current_value|floatformat:2 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+const colors = ['#0071e3','#34aadc','#5856d6','#ff9500','#ff3b30','#34c759','#af52de','#ff2d55','#5ac8fa','#ffcc00'];
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: labels,
+        datasets: [{
+            data: values,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 0,
+            hoverOffset: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        cutout: '60%',
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ` ${ctx.label}: $${ctx.parsed.toLocaleString('en-US', {minimumFractionDigits:2})}`
+                }
+            }
+        }
+    }
+});
+{% endif %}
+
+function refreshPrices() {
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Updating...';
+
+    fetch("{% url 'refresh_prices' portfolio.pk %}")
+        .then(res => res.json())
+        .then(data => {
+            data.updated.forEach(asset => {
+                const valEl = document.getElementById('value-' + asset.id);
+                const plEl = document.getElementById('pl-' + asset.id);
+                if (valEl) valEl.textContent = '$' + asset.current_value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                if (plEl) {
+                    const sign = asset.profit_loss_percent >= 0 ? '+' : '';
+                    const color = asset.profit_loss_percent >= 0 ? '#1c7f3e' : '#c4162a';
+                    const bg = asset.profit_loss_percent >= 0 ? 'rgba(28,127,62,0.08)' : 'rgba(196,22,42,0.08)';
+                    plEl.innerHTML = `<span style="font-size:13px;font-weight:500;padding:3px 8px;border-radius:6px;background:${bg};color:${color}">${sign}${asset.profit_loss_percent.toFixed(2)}%</span>`;
+                }
+            });
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Refresh Prices';
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Refresh Prices';
+        });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Market Mood Ring — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:800px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Market Mood Ring 💍</div>
+    <div class="pq-page-sub mb-4">Real-time market sentiment from 6+ indicators</div>
+
+    {% if mood %}
+
+    <!-- Main Mood Card -->
+    <div class="pq-card p-5 mb-4 text-center" style="border-top:4px solid {{ mood.color }};">
+        <div style="font-size:80px;margin-bottom:16px;line-height:1;">{{ mood.emoji }}</div>
+        <div style="font-size:32px;font-weight:700;letter-spacing:-1px;color:{{ mood.color }};">{{ mood.mood }}</div>
+        <div style="font-size:15px;color:#6e6e73;margin-top:8px;max-width:400px;margin-left:auto;margin-right:auto;">{{ mood.desc }}</div>
+
+        <!-- Score gauge -->
+        <div style="margin:24px auto;max-width:400px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-bottom:8px;">
+                <span>😱 Extreme Fear</span>
+                <span>😐 Neutral</span>
+                <span>🤑 Extreme Greed</span>
+            </div>
+            <div style="background:linear-gradient(90deg,#c4162a,#ff9500,#6e6e73,#0071e3,#1c7f3e);border-radius:8px;height:12px;position:relative;">
+                <div style="position:absolute;top:50%;transform:translate(-50%,-50%);left:{{ mood.score }}%;
+                    width:20px;height:20px;border-radius:50%;background:white;
+                    border:3px solid {{ mood.color }};box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:10px;">
+                <span style="font-size:28px;font-weight:700;color:{{ mood.color }};">{{ mood.score }}/100</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicators -->
+    <div class="pq-card p-4 mb-4">
+        <div style="font-size:16px;font-weight:600;margin-bottom:16px;">Contributing Indicators</div>
+        {% for indicator in mood.indicators %}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:24px;">{{ indicator.icon }}</span>
+                <div style="font-size:14px;font-weight:500;">{{ indicator.name }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:14px;font-weight:600;">{{ indicator.value }}</span>
+                <span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:980px;
+                    background:{% if indicator.signal == 'bullish' %}rgba(28,127,62,0.1){% elif indicator.signal == 'bearish' %}rgba(196,22,42,0.1){% else %}rgba(110,110,115,0.1){% endif %};
+                    color:{% if indicator.signal == 'bullish' %}#1c7f3e{% elif indicator.signal == 'bearish' %}#c4162a{% else %}#6e6e73{% endif %};">
+                    {{ indicator.signal|title }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Historical context -->
+    <div class="pq-card p-4" style="background:rgba(0,113,227,0.03);border-left:3px solid {{ mood.color }};">
+        <div style="font-size:15px;font-weight:600;margin-bottom:12px;">💡 What does this mean?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px;color:#6e6e73;line-height:1.6;">
+            <div>
+                <div style="font-weight:600;color:#1d1d1f;margin-bottom:4px;">Extreme Fear (0-20)</div>
+                Investors panic sell. Historically the best time to buy quality assets.
+                Warren Buffett: "Be greedy when others are fearful."
+            </div>
+            <div>
+                <div style="font-weight:600;color:#1d1d1f;margin-bottom:4px;">Extreme Greed (80-100)</div>
+                Markets are overheated. Consider taking profits or rebalancing.
+                High valuations increase risk of correction.
+            </div>
+            <div>
+                <div style="font-weight:600;color:#1d1d1f;margin-bottom:4px;">Neutral (40-60)</div>
+                Balanced market conditions. No strong directional bias.
+                Good time for DCA strategies.
+            </div>
+            <div>
+                <div style="font-weight:600;color:#1d1d1f;margin-bottom:4px;">Score: {{ mood.score }}/100</div>
+                Based on {{ mood.indicators|length }} market indicators including
+                Fear & Greed, S&P 500, VIX, Bitcoin, Gold, and USD strength.
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

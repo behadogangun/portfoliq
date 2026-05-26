@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Delete Asset — PortfoliQ{% endblock %}
+
+{% block content %}
+<div style="max-width:440px;margin:0 auto;padding:40px 24px;">
+    <div class="pq-card p-5 text-center">
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(196,22,42,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <i class="bi bi-trash" style="font-size:24px;color:#c4162a;"></i>
+        </div>
+        <div style="font-size:19px;font-weight:600;margin-bottom:8px;">Delete asset</div>
+        <div style="font-size:14px;color:#6e6e73;margin-bottom:24px;">
+            <strong>{{ asset.symbol }} — {{ asset.name }}</strong> will be permanently deleted.
+        </div>
+        <form method="post" style="display:flex;gap:8px;justify-content:center;">
+            {% csrf_token %}
+            <button type="submit" class="btn-apple-danger" style="padding:10px 20px;">Delete</button>
+            <a href="{% url 'portfolio_detail' asset.portfolio.pk %}" class="btn-apple-secondary" style="padding:10px 20px;">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

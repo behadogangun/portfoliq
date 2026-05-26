@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Price Targets — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:1000px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Price Target Tracker</div>
+    <div class="pq-page-sub mb-4">Analyst consensus price targets for your stock holdings</div>
+
+    {% if results %}
+
+    <!-- Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #1c7f3e;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Best Upside</div>
+                <div style="font-size:22px;font-weight:700;color:#1c7f3e;">
+                    {{ results.0.asset.symbol }}
+                </div>
+                <div style="font-size:14px;color:#1c7f3e;margin-top:4px;">
+                    +{{ results.0.data.upside|floatformat:1 }}% to target
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #0071e3;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Stocks Tracked</div>
+                <div style="font-size:22px;font-weight:700;">{{ results|length }}</div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">with analyst coverage</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #ff9500;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Consensus</div>
+                <div style="font-size:22px;font-weight:700;color:{{ results.0.data.rec_color }};">
+                    {{ results.0.data.recommendation }}
+                </div>
+                <div style="font-size:12px;color:#6e6e73;margin-top:4px;">top pick</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    {% for item in results %}
+    <div class="pq-card p-4 mb-3">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+            {% if item.asset.logo %}
+            <img src="{{ item.asset.logo }}" style="width:44px;height:44px;border-radius:12px;object-fit:contain;background:#f5f5f7;padding:4px;">
+            {% else %}
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0071e3;">
+                {{ item.asset.symbol|slice:":2" }}
+            </div>
+            {% endif %}
+            <div style="flex:1;">
+                <div style="font-size:16px;font-weight:700;">{{ item.asset.symbol }}</div>
+                <div style="font-size:13px;color:#6e6e73;">{{ item.asset.name }} · {{ item.data.num_analysts }} analysts</div>
+            </div>
+            <div style="text-align:right;">
+                <span style="font-size:13px;font-weight:600;padding:5px 14px;border-radius:980px;
+                    background:{{ item.data.rec_color }}1a;color:{{ item.data.rec_color }};">
+                    {{ item.data.recommendation }}
+                </span>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:20px;font-weight:700;" class="{% if item.data.upside >= 0 %}profit{% else %}loss{% endif %}">
+                    {% if item.data.upside >= 0 %}+{% endif %}{{ item.data.upside|floatformat:1 }}%
+                </div>
+                <div style="font-size:12px;color:#6e6e73;">to mean target</div>
+            </div>
+        </div>
+
+        <!-- Price range bar -->
+        <div style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-bottom:8px;">
+                <span>Low: ${{ item.data.target_low }}</span>
+                <span style="font-weight:600;color:#1d1d1f;">Mean: ${{ item.data.target_mean }}</span>
+                <span>High: ${{ item.data.target_high }}</span>
+            </div>
+            <div style="position:relative;height:10px;background:rgba(0,0,0,0.06);border-radius:8px;">
+                {% if item.data.target_high > item.data.target_low %}
+                    {% with range_size=item.data.target_high|add:"-"|add:item.data.target_low %}
+                    <!-- Current price marker -->
+                    <div style="position:absolute;top:50%;transform:translate(-50%,-50%);
+                        left:{% widthratio item.data.current_price item.data.target_high 100 %}%;
+                        width:14px;height:14px;border-radius:50%;
+                        background:#0071e3;border:2px solid white;
+                        box-shadow:0 1px 4px rgba(0,0,0,0.2);z-index:2;">
+                    </div>
+                    <!-- Mean target marker -->
+                    <div style="position:absolute;top:50%;transform:translate(-50%,-50%);
+                        left:{% widthratio item.data.target_mean item.data.target_high 100 %}%;
+                        width:10px;height:10px;border-radius:50%;
+                        background:#1c7f3e;border:2px solid white;
+                        box-shadow:0 1px 4px rgba(0,0,0,0.2);z-index:2;">
+                    </div>
+                    <!-- Range bar -->
+                    <div style="position:absolute;top:0;bottom:0;border-radius:8px;background:linear-gradient(90deg,rgba(196,22,42,0.15),rgba(28,127,62,0.15));
+                        left:0;right:0;"></div>
+                    {% endwith %}
+                {% endif %}
+            </div>
+            <div style="display:flex;gap:16px;margin-top:8px;font-size:12px;">
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:10px;height:10px;border-radius:50%;background:#0071e3;"></div>
+                    <span style="color:#6e6e73;">Current: ${{ item.data.current_price }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:10px;height:10px;border-radius:50%;background:#1c7f3e;"></div>
+                    <span style="color:#6e6e73;">Mean Target: ${{ item.data.target_mean }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+            <div style="background:#f5f5f7;border-radius:10px;padding:10px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Current</div>
+                <div style="font-size:14px;font-weight:600;">${{ item.data.current_price }}</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:10px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Target Low</div>
+                <div style="font-size:14px;font-weight:600;color:#c4162a;">${{ item.data.target_low }}</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:10px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Target Mean</div>
+                <div style="font-size:14px;font-weight:600;color:#0071e3;">${{ item.data.target_mean }}</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:10px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Target High</div>
+                <div style="font-size:14px;font-weight:600;color:#1c7f3e;">${{ item.data.target_high }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% elif asset_count == 0 %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-bullseye" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;">No stock holdings</div>
+        <div style="font-size:14px;color:#6e6e73;">Add stocks to your portfolio to see analyst price targets.</div>
+        <a href="{% url 'portfolio_list' %}" class="btn-apple" style="margin-top:16px;">View Portfolios</a>
+    </div>
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-bullseye" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;">No analyst data available</div>
+        <div style="font-size:14px;color:#6e6e73;">Could not fetch price targets. Try again later.</div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Break-Even Calculator — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:1000px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Break-Even Calculator</div>
+    <div class="pq-page-sub mb-4">See how far each asset is from breaking even</div>
+
+    {% if results %}
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3" style="border-top:3px solid #0071e3;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Total Assets</div>
+                <div style="font-size:22px;font-weight:700;">{{ results|length }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3" style="border-top:3px solid #1c7f3e;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">In Profit</div>
+                <div style="font-size:22px;font-weight:700;color:#1c7f3e;">
+                    {% with profit_count=0 %}
+                    {% for r in results %}{% if r.is_profit %}{{ forloop.counter }}{% endif %}{% endfor %}
+                    {% endwith %}
+                    {{ results|length }}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3" style="border-top:3px solid #c4162a;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">In Loss</div>
+                <div style="font-size:22px;font-weight:700;color:#c4162a;">
+                    {% for r in results %}{% if not r.is_profit %}1{% endif %}{% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-3" style="border-top:3px solid #ff9500;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Best Performer</div>
+                <div style="font-size:22px;font-weight:700;color:#1c7f3e;">{{ results.0.asset.symbol }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asset Cards -->
+    {% for r in results %}
+    <div class="pq-card p-4 mb-3">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+            {% if r.asset.logo %}
+            <img src="{{ r.asset.logo }}" style="width:44px;height:44px;border-radius:12px;object-fit:contain;background:#f5f5f7;padding:4px;">
+            {% else %}
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,113,227,0.08);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0071e3;">
+                {{ r.asset.symbol|slice:":2" }}
+            </div>
+            {% endif %}
+            <div style="flex:1;">
+                <div style="font-size:16px;font-weight:700;">{{ r.asset.symbol }}</div>
+                <div style="font-size:13px;color:#6e6e73;">{{ r.asset.name }} · {{ r.asset.portfolio.name }}</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:20px;font-weight:700;" class="{% if r.is_profit %}profit{% else %}loss{% endif %}">
+                    {% if r.pl >= 0 %}+{% endif %}{{ r.pl|format_currency }}
+                </div>
+                <div style="font-size:13px;" class="{% if r.is_profit %}profit{% else %}loss{% endif %}">
+                    {% if r.pl_pct >= 0 %}+{% endif %}{{ r.pl_pct|floatformat:2 }}%
+                </div>
+            </div>
+        </div>
+
+        <!-- Price comparison bar -->
+        <div style="margin-bottom:12px;">
+            {% if r.is_profit %}
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-bottom:6px;">
+                <span>Avg Cost: {{ r.avg_cost|format_price }}</span>
+                <span style="color:#1c7f3e;font-weight:600;">Current: {{ r.current_price|format_price }} (+{{ r.pct_to_breakeven|floatformat:2 }}% above cost)</span>
+            </div>
+            <div style="background:rgba(0,0,0,0.06);border-radius:8px;height:10px;overflow:hidden;position:relative;">
+                {% with bar_width=r.pl_pct|floatformat:0 %}
+                <div style="position:absolute;left:0;top:0;bottom:0;width:{% if r.pl_pct > 100 %}100{% else %}{{ r.pl_pct|floatformat:0 }}{% endif %}%;background:linear-gradient(90deg,#1c7f3e,#34c759);border-radius:8px;transition:width 1s ease;"></div>
+                {% endwith %}
+            </div>
+            <div style="font-size:12px;color:#1c7f3e;margin-top:6px;font-weight:500;">
+                ✅ In profit — {{ r.pct_to_breakeven|floatformat:2 }}% above break-even
+            </div>
+            {% else %}
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-bottom:6px;">
+                <span style="color:#c4162a;font-weight:600;">Current: {{ r.current_price|format_price }}</span>
+                <span>Break-even: {{ r.avg_cost|format_price }}</span>
+            </div>
+            <div style="background:rgba(0,0,0,0.06);border-radius:8px;height:10px;overflow:hidden;position:relative;">
+                {% with fill=r.current_price %}
+                <div style="position:absolute;left:0;top:0;bottom:0;width:{% if r.avg_cost > 0 %}{% widthratio r.current_price r.avg_cost 100 %}{% else %}0{% endif %}%;background:linear-gradient(90deg,#c4162a,#ff6b6b);border-radius:8px;transition:width 1s ease;"></div>
+                {% endwith %}
+            </div>
+            <div style="font-size:12px;color:#c4162a;margin-top:6px;font-weight:500;">
+                📉 Needs +{{ r.pct_to_breakeven|floatformat:2 }}% to break even
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+            <div style="background:#f5f5f7;border-radius:10px;padding:10px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Quantity</div>
+                <div style="font-size:14px;font-weight:600;">{{ r.quantity|format_quantity }}</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:10px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Avg Cost</div>
+                <div style="font-size:14px;font-weight:600;">{{ r.avg_cost|format_price }}</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:10px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Current Price</div>
+                <div style="font-size:14px;font-weight:600;">{{ r.current_price|format_price }}</div>
+            </div>
+            <div style="background:#f5f5f7;border-radius:10px;padding:10px;text-align:center;">
+                <div style="font-size:11px;color:#6e6e73;margin-bottom:4px;">Total Cost</div>
+                <div style="font-size:14px;font-weight:600;">{{ r.total_cost|format_currency }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="pq-card p-5 text-center">
+        <i class="bi bi-calculator" style="font-size:40px;color:#c7c7cc;display:block;margin-bottom:16px;"></i>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;">No assets found</div>
+        <div style="font-size:14px;color:#6e6e73;">Add assets to your portfolio to see break-even analysis.</div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
