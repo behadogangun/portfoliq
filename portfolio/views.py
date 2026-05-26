@@ -9,6 +9,8 @@ import csv
 import datetime
 import requests
 from collections import defaultdict
+import os
+ALPHA_VANTAGE_KEY = os.environ.get('ALPHA_VANTAGE_KEY', 'demo')
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
