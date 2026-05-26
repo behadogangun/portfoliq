@@ -91,27 +91,67 @@ def get_stock_info(symbol):
     if cached:
         return cached
     try:
-        import yfinance as yf
-        ticker = yf.Ticker(symbol)
-        info = ticker.info
-        price = info.get('currentPrice') or info.get('regularMarketPrice') or 0
-        prev_close = info.get('previousClose') or price
-        change_24h = ((price - prev_close) / prev_close * 100) if prev_close else 0
+        # Alpha Vantage global quote — hızlı REST API
+        url = (
+            f'https://www.alphavantage.co/query'
+            f'?function=GLOBAL_QUOTE&symbol={symbol}&apikey={ALPHA_VANTAGE_KEY}'
+        )
+        r = requests.get(url, timeout=8)
+        data = r.json().get('Global Quote', {})
+        
+        price = float(data.get('05. price', 0))
+        prev_close = float(data.get('08. previous close', 0))
+        change_pct = float(data.get('10. change percent', '0').replace('%', ''))
+        
+        if not price:
+            raise ValueError('No price')
+        
+        # İsim için yfinance — sadece bir kez çağrılır, cache'lenir
+        name = symbol
+        try:
+            import yfinance as yf
+            info = yf.Ticker(symbol).info
+            name = info.get('longName') or info.get('shortName', symbol)
+        except Exception:
+            pass
+        
         result = {
             'symbol': symbol.upper(),
-            'name': info.get('longName') or info.get('shortName', symbol),
+            'name': name,
             'logo': f'https://financialmodelingprep.com/image-stock/{symbol}.png',
             'price': price,
-            'change_24h': round(change_24h, 2),
-            'market_cap': info.get('marketCap', 0),
-            'volume_24h': info.get('volume', 0),
-            'sector': info.get('sector', ''),
+            'change_24h': round(change_pct, 2),
+            'market_cap': 0,
+            'volume_24h': 0,
+            'sector': '',
             'sparkline': [],
         }
         cache.set(cache_key, result, 60)
         return result
     except Exception:
-        return None
+        # Fallback: yfinance
+        try:
+            import yfinance as yf
+            ticker = yf.Ticker(symbol)
+            info = ticker.info
+            price = info.get('currentPrice') or info.get('regularMarketPrice') or 0
+            prev_close = info.get('previousClose') or price
+            change_24h = ((price - prev_close) / prev_close * 100) if prev_close else 0
+            result = {
+                'symbol': symbol.upper(),
+                'name': info.get('longName') or info.get('shortName', symbol),
+                'logo': f'https://financialmodelingprep.com/image-stock/{symbol}.png',
+                'price': price,
+                'change_24h': round(change_24h, 2),
+                'market_cap': info.get('marketCap', 0),
+                'volume_24h': info.get('volume', 0),
+                'sector': info.get('sector', ''),
+                'sparkline': [],
+            }
+            cache.set(cache_key, result, 60)
+            return result
+        except Exception:
+            return None
 
 
 FMP_KEY = os.environ.get('FMP_KEY', '')
