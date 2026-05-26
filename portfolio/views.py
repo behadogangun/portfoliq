@@ -212,9 +212,12 @@ def asset_create(request, portfolio_pk):
             avg_buy_price=avg_buy_price,
             logo=logo,
         )
-        price = fetch_price(asset)
-        if price:
-            PriceHistory.objects.create(asset=asset, price=price)
+        try:
+            price = fetch_price(asset)
+            if price:
+                PriceHistory.objects.create(asset=asset, price=price)
+        except Exception:
+            pass
         messages.success(request, f'{symbol} added to portfolio!')
         return redirect('portfolio_detail', pk=portfolio.pk)
 
