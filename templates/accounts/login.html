@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Sign In — PortfoliQ{% endblock %}
-{% if form.non_field_errors %}
-<div style="background:rgba(196,22,42,0.08);border:1px solid rgba(196,22,42,0.2);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-    <i class="bi bi-exclamation-circle" style="color:#c4162a;font-size:16px;"></i>
-    <span style="font-size:14px;color:#c4162a;font-weight:500;">Invalid username or password.</span>
-</div>
+
 {% endif %}
 {% block content %}
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
