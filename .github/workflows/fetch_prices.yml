@@ -2,13 +2,16 @@ name: Fetch Prices
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # Her 10 dakika
-  workflow_dispatch:          # Manuel tetikleme
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
+      - name: Keep Render alive
+        run: curl https://portfoliq.onrender.com/ -s -o /dev/null
+        
       - name: Trigger price fetch
         run: |
           curl -X POST https://portfoliq.onrender.com/ajax/fetch-prices/ \
