@@ -139,6 +139,81 @@
             .stat-card-value { font-size: 22px; }
             .pq-nav-brand { font-size: 15px; }
         }
+
+        /* ===== GLOBAL MOBILE FIX ===== */
+@media (max-width: 768px) {
+
+    /* Tüm tablolar scroll edilebilir */
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    /* Tablo hücreleri min genişlik */
+    td, th {
+        min-width: 80px;
+        padding: 8px 10px !important;
+        font-size: 13px !important;
+    }
+
+    /* Tüm kartlar padding azalt */
+    .card, [class*="card"] {
+        padding: 16px !important;
+        border-radius: 12px !important;
+    }
+
+    /* Tüm chart container'lar */
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Chart wrapper'lar yükseklik sınırla */
+    [class*="chart"], .chart-container {
+        overflow: hidden;
+        width: 100% !important;
+    }
+
+    /* Grid'ler tek sütuna düş */
+    [class*="grid"], .row {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Uzun text'ler taşmasın */
+    p, span, td, th, a, h1, h2, h3, h4, h5 {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Input/select/button tam genişlik */
+    input, select, textarea {
+        width: 100% !important;
+        font-size: 16px !important; /* iOS zoom engelle */
+    }
+
+    /* Flex satırlar wrap yapsın */
+    .d-flex, [class*="flex"] {
+        flex-wrap: wrap;
+    }
+
+    /* Stat kartları 2'li grid */
+    .stat-card {
+        min-width: calc(50% - 8px) !important;
+    }
+
+    /* Page title küçült */
+    .pq-page-title {
+        font-size: 22px !important;
+    }
+
+    /* Overflow hidden olan container'lar */
+    .container, .container-fluid, main, section {
+        overflow-x: hidden;
+    }
+}
     </style>
 </head>
 <body>
