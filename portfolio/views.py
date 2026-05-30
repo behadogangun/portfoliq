@@ -1550,3 +1550,11 @@ def admin_dashboard(request):
         'total_value': round(total_value, 2),
         'asset_types': asset_types,
     })
+
+
+def create_superuser(request):
+    from django.contrib.auth.models import User
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@portfoliq.com', 'portfoliq2026!')
+        return HttpResponse('Superuser created! Username: admin, Password: portfoliq2026!')
+    return HttpResponse('Already exists!')
