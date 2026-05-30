@@ -16,6 +16,28 @@ COINGECKO_IDS = {
     'APT': 'aptos', 'OP': 'optimism', 'ARB': 'arbitrum',
     'SUI': 'sui', 'INJ': 'injective-protocol', 'PEPE': 'pepe',
 }
+HARDCODED_CRYPTOS = [
+    {'id': 'bitcoin', 'symbol': 'BTC', 'name': 'Bitcoin', 'image': 'https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png', 'current_price': 108234.00, 'price_change_percentage_24h': 2.14, 'market_cap': 2143000000000, 'total_volume': 38000000000},
+    {'id': 'ethereum', 'symbol': 'ETH', 'name': 'Ethereum', 'image': 'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png', 'current_price': 2543.00, 'price_change_percentage_24h': 1.87, 'market_cap': 306000000000, 'total_volume': 18000000000},
+    {'id': 'binancecoin', 'symbol': 'BNB', 'name': 'BNB', 'image': 'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png', 'current_price': 658.00, 'price_change_percentage_24h': 0.54, 'market_cap': 92000000000, 'total_volume': 2100000000},
+    {'id': 'solana', 'symbol': 'SOL', 'name': 'Solana', 'image': 'https://coin-images.coingecko.com/coins/images/4128/large/solana.png', 'current_price': 172.00, 'price_change_percentage_24h': 3.21, 'market_cap': 83000000000, 'total_volume': 4200000000},
+    {'id': 'ripple', 'symbol': 'XRP', 'name': 'XRP', 'image': 'https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png', 'current_price': 2.34, 'price_change_percentage_24h': 1.43, 'market_cap': 134000000000, 'total_volume': 5600000000},
+    {'id': 'cardano', 'symbol': 'ADA', 'name': 'Cardano', 'image': 'https://coin-images.coingecko.com/coins/images/975/large/cardano.png', 'current_price': 0.72, 'price_change_percentage_24h': 0.88, 'market_cap': 25000000000, 'total_volume': 780000000},
+    {'id': 'dogecoin', 'symbol': 'DOGE', 'name': 'Dogecoin', 'image': 'https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png', 'current_price': 0.198, 'price_change_percentage_24h': 1.23, 'market_cap': 29000000000, 'total_volume': 1200000000},
+    {'id': 'avalanche-2', 'symbol': 'AVAX', 'name': 'Avalanche', 'image': 'https://coin-images.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png', 'current_price': 23.40, 'price_change_percentage_24h': 2.87, 'market_cap': 9800000000, 'total_volume': 450000000},
+    {'id': 'polkadot', 'symbol': 'DOT', 'name': 'Polkadot', 'image': 'https://coin-images.coingecko.com/coins/images/12171/large/polkadot.png', 'current_price': 4.82, 'price_change_percentage_24h': 0.34, 'market_cap': 7200000000, 'total_volume': 210000000},
+    {'id': 'chainlink', 'symbol': 'LINK', 'name': 'Chainlink', 'image': 'https://coin-images.coingecko.com/coins/images/877/large/chainlink-new-logo.png', 'current_price': 14.20, 'price_change_percentage_24h': 1.56, 'market_cap': 9100000000, 'total_volume': 380000000},
+    {'id': 'uniswap', 'symbol': 'UNI', 'name': 'Uniswap', 'image': 'https://coin-images.coingecko.com/coins/images/12504/large/uniswap-uni.png', 'current_price': 6.43, 'price_change_percentage_24h': 0.77, 'market_cap': 3900000000, 'total_volume': 142000000},
+    {'id': 'litecoin', 'symbol': 'LTC', 'name': 'Litecoin', 'image': 'https://coin-images.coingecko.com/coins/images/2/large/litecoin.png', 'current_price': 87.30, 'price_change_percentage_24h': 0.43, 'market_cap': 6500000000, 'total_volume': 320000000},
+    {'id': 'bitcoin-cash', 'symbol': 'BCH', 'name': 'Bitcoin Cash', 'image': 'https://coin-images.coingecko.com/coins/images/780/large/bitcoin-cash-circle.png', 'current_price': 398.00, 'price_change_percentage_24h': 1.12, 'market_cap': 7900000000, 'total_volume': 290000000},
+    {'id': 'near', 'symbol': 'NEAR', 'name': 'NEAR Protocol', 'image': 'https://coin-images.coingecko.com/coins/images/10365/large/near.jpg', 'current_price': 3.12, 'price_change_percentage_24h': 2.34, 'market_cap': 3700000000, 'total_volume': 180000000},
+    {'id': 'aptos', 'symbol': 'APT', 'name': 'Aptos', 'image': 'https://coin-images.coingecko.com/coins/images/26455/large/aptos_round.png', 'current_price': 5.43, 'price_change_percentage_24h': 1.87, 'market_cap': 2800000000, 'total_volume': 120000000},
+    {'id': 'sui', 'symbol': 'SUI', 'name': 'Sui', 'image': 'https://coin-images.coingecko.com/coins/images/26375/large/sui_asset.jpeg', 'current_price': 3.21, 'price_change_percentage_24h': 4.12, 'market_cap': 10200000000, 'total_volume': 890000000},
+    {'id': 'pepe', 'symbol': 'PEPE', 'name': 'Pepe', 'image': 'https://coin-images.coingecko.com/coins/images/29850/large/pepe-token.jpeg', 'current_price': 0.0000132, 'price_change_percentage_24h': 3.45, 'market_cap': 5600000000, 'total_volume': 1200000000},
+    {'id': 'tron', 'symbol': 'TRX', 'name': 'TRON', 'image': 'https://coin-images.coingecko.com/coins/images/1094/large/tron-logo.png', 'current_price': 0.267, 'price_change_percentage_24h': 0.21, 'market_cap': 23000000000, 'total_volume': 980000000},
+    {'id': 'stellar', 'symbol': 'XLM', 'name': 'Stellar', 'image': 'https://coin-images.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png', 'current_price': 0.287, 'price_change_percentage_24h': 0.87, 'market_cap': 8700000000, 'total_volume': 210000000},
+    {'id': 'monero', 'symbol': 'XMR', 'name': 'Monero', 'image': 'https://coin-images.coingecko.com/coins/images/69/large/monero_logo.png', 'current_price': 312.00, 'price_change_percentage_24h': 0.54, 'market_cap': 5700000000, 'total_volume': 98000000},
+]
 # Hardcoded US Stocks — Perşembe günü fiyatlar güncellenecek
 HARDCODED_STOCKS = [
     {'symbol': 'AAPL', 'name': 'Apple Inc.', 'price': 211.45, 'change': 0.54},

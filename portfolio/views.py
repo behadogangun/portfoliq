@@ -439,13 +439,14 @@ def ticker_data(request):
 @login_required
 def market(request):
     tab = request.GET.get('tab', 'crypto')
-    from .services import HARDCODED_STOCKS
+    from .services import HARDCODED_STOCKS, HARDCODED_CRYPTOS
     from django.core.cache import cache
 
     cryptos = []
     stocks = []
 
     if tab == 'crypto':
+        # Önce CoinGecko'dan gerçek zamanlı dene
         cached = cache.get('market_cryptos')
         if cached:
             cryptos = cached
@@ -456,12 +457,15 @@ def market(request):
                     '?vs_currency=usd&order=market_cap_desc&per_page=20&page=1'
                     '&sparkline=true&price_change_percentage=24h'
                 )
-                r = requests.get(url, timeout=10)
-                cryptos = r.json()
-                if cryptos:
+                r = requests.get(url, timeout=8)
+                data = r.json()
+                if data and isinstance(data, list) and len(data) > 0:
+                    cryptos = data
                     cache.set('market_cryptos', cryptos, 300)
+                else:
+                    cryptos = HARDCODED_CRYPTOS
             except Exception:
-                pass
+                cryptos = HARDCODED_CRYPTOS
 
     elif tab == 'stocks':
         for stock in HARDCODED_STOCKS:
