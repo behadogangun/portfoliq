@@ -57,4 +57,5 @@ urlpatterns = [
     path('converter/', views.currency_converter, name='currency_converter'),
     path('admin-panel/', views.admin_dashboard, name='admin_dashboard'),
     path('setup-admin/', views.create_superuser),
+    path('ajax/announcement/', views.get_announcement, name='get_announcement'),
 ]

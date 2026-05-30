@@ -1511,44 +1511,108 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 @staff_member_required
 def admin_dashboard(request):
-    """Custom Admin Dashboard."""
     from django.contrib.auth.models import User
-    from django.db.models import Sum, Count
+    from django.db.models import Count
+    from django.core.cache import cache
+
+    action = request.POST.get('action')
     
-    # Stats
+    if action == 'clear_cache':
+        cache.clear()
+        messages.success(request, '✅ Cache cleared successfully!')
+    
+    elif action == 'toggle_user':
+        user_id = request.POST.get('user_id')
+        try:
+            u = User.objects.get(pk=user_id)
+            if u != request.user:
+                u.is_active = not u.is_active
+                u.save()
+                messages.success(request, f'User {u.username} {"activated" if u.is_active else "deactivated"}!')
+        except User.DoesNotExist:
+            pass
+
+    elif action == 'delete_user':
+        user_id = request.POST.get('user_id')
+        try:
+            u = User.objects.get(pk=user_id)
+            if u != request.user:
+                u.delete()
+                messages.success(request, 'User deleted!')
+        except User.DoesNotExist:
+            pass
+
+    elif action == 'delete_portfolio':
+        portfolio_id = request.POST.get('portfolio_id')
+        try:
+            p = Portfolio.objects.get(pk=portfolio_id)
+            p.delete()
+            messages.success(request, 'Portfolio deleted!')
+        except Portfolio.DoesNotExist:
+            pass
+
+    elif action == 'announce':
+        announcement = request.POST.get('announcement', '').strip()
+        if announcement:
+            cache.set('site_announcement', announcement, 86400)
+            messages.success(request, '📢 Announcement published!')
+
+    elif action == 'clear_announcement':
+        cache.delete('site_announcement')
+        messages.success(request, 'Announcement cleared!')
+
     total_users = User.objects.count()
     total_portfolios = Portfolio.objects.count()
     total_assets = Asset.objects.count()
     total_transactions = Transaction.objects.count()
-    
-    # Son kayıtlar
-    recent_users = User.objects.order_by('-date_joined')[:5]
-    recent_portfolios = Portfolio.objects.order_by('-created_at')[:5]
-    
-    # En çok eklenen hisseler
+
+    all_users = User.objects.order_by('-date_joined')
+    all_portfolios = Portfolio.objects.select_related('user').prefetch_related('assets').order_by('-created_at')
+
     top_assets = Asset.objects.values('symbol', 'name').annotate(
         count=Count('id')
     ).order_by('-count')[:10]
-    
-    # Portföy değerleri
-    portfolios = Portfolio.objects.prefetch_related('assets').all()
-    total_value = sum(p.total_value() for p in portfolios)
-    
-    # Asset type dağılımı
+
+    portfolios_all = Portfolio.objects.prefetch_related('assets').all()
+    total_value = sum(p.total_value() for p in portfolios_all)
+
     asset_types = Asset.objects.values('asset_type').annotate(
         count=Count('id')
     ).order_by('-count')
+
+    import requests as req
+    system_status = []
+    apis = [
+        ('CoinGecko', 'https://api.coingecko.com/api/v3/ping'),
+        ('Alternative.me', 'https://api.alternative.me/fng/?limit=1'),
+        ('ExchangeRate', 'https://api.exchangerate-api.com/v4/latest/USD'),
+    ]
+    for name, url in apis:
+        try:
+            r = req.get(url, timeout=5)
+            system_status.append({
+                'name': name,
+                'status': 'online' if r.status_code == 200 else 'error',
+                'color': '#1c7f3e' if r.status_code == 200 else '#c4162a',
+                'icon': '✅' if r.status_code == 200 else '❌',
+            })
+        except Exception:
+            system_status.append({'name': name, 'status': 'offline', 'color': '#c4162a', 'icon': '❌'})
+
+    current_announcement = cache.get('site_announcement', '')
 
     return render(request, 'portfolio/admin_dashboard.html', {
         'total_users': total_users,
         'total_portfolios': total_portfolios,
         'total_assets': total_assets,
         'total_transactions': total_transactions,
-        'recent_users': recent_users,
-        'recent_portfolios': recent_portfolios,
+        'all_users': all_users,
+        'all_portfolios': all_portfolios,
         'top_assets': top_assets,
         'total_value': round(total_value, 2),
         'asset_types': asset_types,
+        'system_status': system_status,
+        'current_announcement': current_announcement,
     })
 
 
@@ -1558,3 +1622,10 @@ def create_superuser(request):
         User.objects.create_superuser('admin', 'admin@portfoliq.com', 'portfoliq2026!')
         return HttpResponse('Superuser created! Username: admin, Password: portfoliq2026!')
     return HttpResponse('Already exists!')
+
+
+@login_required
+def get_announcement(request):
+    from django.core.cache import cache
+    msg = cache.get('site_announcement', '')
+    return JsonResponse({'message': msg})
