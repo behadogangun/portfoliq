@@ -54,4 +54,5 @@ urlpatterns = [
     path('famous/', views.famous_investors, name='famous_investors'),
     path('crisis/', views.crisis_sim, name='crisis_sim'),
     path('ajax/fetch-prices/', views.fetch_prices_cron, name='fetch_prices_cron'),
+    path('converter/', views.currency_converter, name='currency_converter'),
 ]

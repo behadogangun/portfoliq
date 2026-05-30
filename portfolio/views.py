@@ -1447,3 +1447,60 @@ def fetch_prices_cron(request):
             continue
     
     return JsonResponse({'updated': updated, 'total': assets.count()})
+
+@login_required
+def currency_converter(request):
+    """Döviz Çevirici."""
+    result = None
+    
+    if request.method == 'POST':
+        amount = float(request.POST.get('amount', 1))
+        from_currency = request.POST.get('from_currency', 'USD')
+        to_currency = request.POST.get('to_currency', 'TRY')
+        
+        try:
+            url = f'https://api.exchangerate-api.com/v4/latest/{from_currency}'
+            r = requests.get(url, timeout=6)
+            data = r.json()
+            rate = data['rates'].get(to_currency, 0)
+            converted = round(amount * rate, 4)
+            result = {
+                'amount': amount,
+                'from': from_currency,
+                'to': to_currency,
+                'rate': round(rate, 4),
+                'converted': converted,
+            }
+        except Exception:
+            messages.error(request, 'Could not fetch exchange rate.')
+    
+    currencies = [
+        ('USD', '🇺🇸 US Dollar'),
+        ('TRY', '🇹🇷 Turkish Lira'),
+        ('EUR', '🇪🇺 Euro'),
+        ('GBP', '🇬🇧 British Pound'),
+        ('JPY', '🇯🇵 Japanese Yen'),
+        ('CHF', '🇨🇭 Swiss Franc'),
+        ('CAD', '🇨🇦 Canadian Dollar'),
+        ('AUD', '🇦🇺 Australian Dollar'),
+        ('CNY', '🇨🇳 Chinese Yuan'),
+        ('SAR', '🇸🇦 Saudi Riyal'),
+        ('AED', '🇦🇪 UAE Dirham'),
+        ('KRW', '🇰🇷 South Korean Won'),
+        ('INR', '🇮🇳 Indian Rupee'),
+        ('BRL', '🇧🇷 Brazilian Real'),
+        ('MXN', '🇲🇽 Mexican Peso'),
+        ('RUB', '🇷🇺 Russian Ruble'),
+        ('SGD', '🇸🇬 Singapore Dollar'),
+        ('HKD', '🇭🇰 Hong Kong Dollar'),
+        ('SEK', '🇸🇪 Swedish Krona'),
+        ('NOK', '🇳🇴 Norwegian Krone'),
+    ]
+    
+    return render(request, 'portfolio/currency_converter.html', {
+        'result': result,
+        'currencies': currencies,
+        'from_currency': request.POST.get('from_currency', 'USD'),
+        'to_currency': request.POST.get('to_currency', 'TRY'),
+        'amount': request.POST.get('amount', '1'),
+    })

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Currency Converter — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:600px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">Currency Converter</div>
+    <div class="pq-page-sub mb-4">Real-time exchange rates for 150+ currencies</div>
+
+    <div class="pq-card p-4 mb-4">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Amount</label>
+                <input type="number" name="amount" class="pq-input" value="{{ amount }}" min="0" step="0.01" required>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-5">
+                    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">From</label>
+                    <select name="from_currency" class="pq-input">
+                        {% for code, name in currencies %}
+                        <option value="{{ code }}" {% if from_currency == code %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-2 d-flex align-items-end justify-content-center pb-2">
+                    <span style="font-size:20px;">⇄</span>
+                </div>
+                <div class="col-5">
+                    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">To</label>
+                    <select name="to_currency" class="pq-input">
+                        {% for code, name in currencies %}
+                        <option value="{{ code }}" {% if to_currency == code %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn-apple" style="width:100%;justify-content:center;">
+                Convert
+            </button>
+        </form>
+    </div>
+
+    {% if result %}
+    <div class="pq-card p-5 text-center" style="border-top:3px solid #0071e3;">
+        <div style="font-size:14px;color:#6e6e73;margin-bottom:8px;">
+            {{ result.amount }} {{ result.from }} =
+        </div>
+        <div style="font-size:42px;font-weight:700;letter-spacing:-1px;color:#0071e3;margin-bottom:8px;">
+            {{ result.converted }}
+        </div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:16px;">{{ result.to }}</div>
+        <div style="font-size:13px;color:#6e6e73;">
+            1 {{ result.from }} = {{ result.rate }} {{ result.to }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Popular rates -->
+    <div class="pq-card p-4 mt-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Popular Rates (vs USD)</div>
+        <div id="ratesContainer">
+            <div style="text-align:center;padding:20px;color:#6e6e73;">Loading rates...</div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Popular rates
+fetch('https://api.exchangerate-api.com/v4/latest/USD')
+    .then(r => r.json())
+    .then(data => {
+        const popular = [
+            {code: 'TRY', flag: '🇹🇷', name: 'Turkish Lira'},
+            {code: 'EUR', flag: '🇪🇺', name: 'Euro'},
+            {code: 'GBP', flag: '🇬🇧', name: 'British Pound'},
+            {code: 'JPY', flag: '🇯🇵', name: 'Japanese Yen'},
+            {code: 'CHF', flag: '🇨🇭', name: 'Swiss Franc'},
+            {code: 'CAD', flag: '🇨🇦', name: 'Canadian Dollar'},
+            {code: 'AUD', flag: '🇦🇺', name: 'Australian Dollar'},
+            {code: 'CNY', flag: '🇨🇳', name: 'Chinese Yuan'},
+            {code: 'SAR', flag: '🇸🇦', name: 'Saudi Riyal'},
+            {code: 'AED', flag: '🇦🇪', name: 'UAE Dirham'},
+        ];
+        const container = document.getElementById('ratesContainer');
+        container.innerHTML = popular.map(c => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:20px;">${c.flag}</span>
+                    <div>
+                        <div style="font-size:14px;font-weight:500;">${c.code}</div>
+                        <div style="font-size:12px;color:#6e6e73;">${c.name}</div>
+                    </div>
+                </div>
+                <div style="font-size:16px;font-weight:600;">${data.rates[c.code]?.toFixed(4) || '—'}</div>
+            </div>
+        `).join('');
+    })
+    .catch(() => {
+        document.getElementById('ratesContainer').innerHTML = '<div style="text-align:center;padding:20px;color:#6e6e73;">Could not load rates.</div>';
+    });
+</script>
+{% endblock %}
