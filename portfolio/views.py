@@ -382,14 +382,17 @@ def asset_info(request):
 
 @login_required
 def ticker_data(request):
+    """Live ticker price data."""
     from django.core.cache import cache
-    import logging
-    logger = logging.getLogger(__name__)
-    
-    TWELVE_DATA_KEY = os.environ.get('TWELVE_DATA_KEY', '')
+    from .services import HARDCODED_STOCKS, HARDCODED_BIST
+
+    cached = cache.get('ticker_data')
+    if cached:
+        return JsonResponse({'tickers': cached})
+
     results = []
 
-    # Crypto
+    # Crypto — CoinGecko gerçek zamanlı
     try:
         ids = 'bitcoin,ethereum,binancecoin,solana,ripple,cardano,dogecoin,avalanche-2'
         r = requests.get(
@@ -409,47 +412,26 @@ def ticker_data(request):
                     'price': data[coin_id]['usd'],
                     'change': round(data[coin_id].get('usd_24h_change', 0), 2),
                 })
-        
-    except Exception as e:
-        pass
-        
-
-    # Stocks
-    try:
-        stock_symbols = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL']
-        symbols_str = ','.join(stock_symbols)
-        stock_symbols = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'META', 'AMZN', 'JPM', 'V', 'WMT']
-        symbols_str = ','.join(stock_symbols)
-        url = f'https://api.twelvedata.com/quote?symbol={symbols_str}&apikey={TWELVE_DATA_KEY}'
-        r = requests.get(url, timeout=10)
-        data = r.json()
-        for symbol in stock_symbols:
-            if symbol in data and isinstance(data[symbol], dict):
-                val = data[symbol]
-                price = float(val.get('close', 0) or 0)
-                prev = float(val.get('previous_close', price) or price)
-                change = ((price - prev) / prev * 100) if prev else 0
-                if price:
-                    results.append({
-                        'symbol': symbol,
-                        'price': price,
-                        'change': round(change, 2),
-                    })
-        r = requests.get(url, timeout=10)
-        data = r.json()
-        
-        for symbol in stock_symbols:
-            if symbol in data and isinstance(data[symbol], dict) and 'price' in data[symbol]:
-                results.append({
-                    'symbol': symbol,
-                    'price': float(data[symbol]['price']),
-                    'change': 0,
-                })
-    except Exception as e:
+    except Exception:
         pass
 
-    
-    cache.set('ticker_data', results, 120)
+    # US Stocks — hardcoded
+    for stock in HARDCODED_STOCKS:
+        results.append({
+            'symbol': stock['symbol'],
+            'price': stock['price'],
+            'change': stock['change'],
+        })
+
+    # BIST — hardcoded
+    for stock in HARDCODED_BIST:
+        results.append({
+            'symbol': stock['symbol'],
+            'price': stock['price'],
+            'change': stock['change'],
+        })
+
+    cache.set('ticker_data', results, 300)
     return JsonResponse({'tickers': results})
 
 # --- Market ---
@@ -457,8 +439,36 @@ def ticker_data(request):
 @login_required
 def market(request):
     tab = request.GET.get('tab', 'crypto')
-    cryptos = get_top_cryptos() if tab == 'crypto' else []
-    stocks = get_top_stocks() if tab == 'stocks' else []
+    from .services import HARDCODED_STOCKS
+
+    cryptos = []
+    stocks = []
+
+    if tab == 'crypto':
+        try:
+            url = (
+                'https://api.coingecko.com/api/v3/coins/markets'
+                '?vs_currency=usd&order=market_cap_desc&per_page=20&page=1'
+                '&sparkline=true&price_change_percentage=24h'
+            )
+            r = requests.get(url, timeout=10)
+            cryptos = r.json()
+        except Exception:
+            pass
+
+    elif tab == 'stocks':
+        for stock in HARDCODED_STOCKS:
+            stocks.append({
+                'symbol': stock['symbol'],
+                'name': stock['name'],
+                'image': f'https://financialmodelingprep.com/image-stock/{stock["symbol"]}.png',
+                'current_price': stock['price'],
+                'price_change_percentage_24h': stock['change'],
+                'market_cap': 0,
+                'total_volume': 0,
+                'sparkline_in_7d': {'price': []},
+            })
+
     return render(request, 'portfolio/market.html', {
         'cryptos': cryptos,
         'stocks': stocks,
@@ -1268,10 +1278,19 @@ def efficient_frontier(request):
 @login_required
 def bist_market(request):
     """BIST Market — Borsa İstanbul hisseleri."""
-    stocks = get_bist_overview()
+    from .services import HARDCODED_BIST
+    
     usd_try = get_tcmb_rate()
+    
+    stocks = []
+    for stock in HARDCODED_BIST:
+        stocks.append({
+            'symbol': stock['symbol'],
+            'name': stock['name'],
+            'price': stock['price'],
+            'change_24h': stock['change'],
+        })
 
-    # Portföy TL değeri
     all_assets = Asset.objects.filter(
         portfolio__user=request.user
     ).prefetch_related(

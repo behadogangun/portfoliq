@@ -16,6 +16,58 @@ COINGECKO_IDS = {
     'APT': 'aptos', 'OP': 'optimism', 'ARB': 'arbitrum',
     'SUI': 'sui', 'INJ': 'injective-protocol', 'PEPE': 'pepe',
 }
+# Hardcoded US Stocks — Perşembe günü fiyatlar güncellenecek
+HARDCODED_STOCKS = [
+    {'symbol': 'AAPL', 'name': 'Apple Inc.', 'price': 211.45, 'change': 0.54},
+    {'symbol': 'MSFT', 'name': 'Microsoft', 'price': 415.60, 'change': -0.71},
+    {'symbol': 'NVDA', 'name': 'NVIDIA', 'price': 1087.20, 'change': 1.23},
+    {'symbol': 'GOOGL', 'name': 'Alphabet', 'price': 178.90, 'change': 0.31},
+    {'symbol': 'AMZN', 'name': 'Amazon', 'price': 196.75, 'change': 0.89},
+    {'symbol': 'META', 'name': 'Meta', 'price': 579.30, 'change': -0.21},
+    {'symbol': 'TSLA', 'name': 'Tesla', 'price': 178.20, 'change': -1.45},
+    {'symbol': 'JPM', 'name': 'JPMorgan Chase', 'price': 234.50, 'change': 0.66},
+    {'symbol': 'BAC', 'name': 'Bank of America', 'price': 43.20, 'change': 0.44},
+    {'symbol': 'GS', 'name': 'Goldman Sachs', 'price': 502.30, 'change': 1.81},
+    {'symbol': 'V', 'name': 'Visa', 'price': 327.80, 'change': -0.32},
+    {'symbol': 'MA', 'name': 'Mastercard', 'price': 489.60, 'change': 0.18},
+    {'symbol': 'WMT', 'name': 'Walmart', 'price': 94.50, 'change': 0.22},
+    {'symbol': 'JNJ', 'name': 'Johnson & Johnson', 'price': 148.30, 'change': -0.15},
+    {'symbol': 'XOM', 'name': 'Exxon Mobil', 'price': 112.40, 'change': 0.55},
+    {'symbol': 'UNH', 'name': 'UnitedHealth', 'price': 491.20, 'change': 0.33},
+    {'symbol': 'LLY', 'name': 'Eli Lilly', 'price': 797.50, 'change': 1.12},
+    {'symbol': 'HD', 'name': 'Home Depot', 'price': 342.10, 'change': -0.48},
+    {'symbol': 'PG', 'name': 'Procter & Gamble', 'price': 165.80, 'change': 0.11},
+    {'symbol': 'NFLX', 'name': 'Netflix', 'price': 628.40, 'change': 2.14},
+    {'symbol': 'ORCL', 'name': 'Oracle', 'price': 138.70, 'change': 0.87},
+    {'symbol': 'ADBE', 'name': 'Adobe', 'price': 452.30, 'change': -0.63},
+    {'symbol': 'CRM', 'name': 'Salesforce', 'price': 278.90, 'change': 0.44},
+    {'symbol': 'AMD', 'name': 'AMD', 'price': 163.40, 'change': 1.56},
+    {'symbol': 'INTC', 'name': 'Intel', 'price': 29.80, 'change': -0.77},
+    {'symbol': 'COIN', 'name': 'Coinbase', 'price': 224.50, 'change': 3.21},
+    {'symbol': 'PLTR', 'name': 'Palantir', 'price': 23.40, 'change': 1.87},
+    {'symbol': 'UBER', 'name': 'Uber', 'price': 72.30, 'change': 0.54},
+    {'symbol': 'ABNB', 'name': 'Airbnb', 'price': 145.60, 'change': -0.32},
+    {'symbol': 'SHOP', 'name': 'Shopify', 'price': 68.90, 'change': 1.23},
+]
+
+# Hardcoded BIST Stocks
+HARDCODED_BIST = [
+    {'symbol': 'THYAO', 'name': 'Türk Hava Yolları', 'price': 248.50, 'change': 1.23},
+    {'symbol': 'ASELS', 'name': 'Aselsan', 'price': 64.30, 'change': -0.45},
+    {'symbol': 'GARAN', 'name': 'Garanti Bankası', 'price': 112.80, 'change': 0.89},
+    {'symbol': 'SASA', 'name': 'SASA Polyester', 'price': 87.40, 'change': 2.14},
+    {'symbol': 'KCHOL', 'name': 'Koç Holding', 'price': 198.60, 'change': 0.33},
+    {'symbol': 'TUPRS', 'name': 'Tüpraş', 'price': 178.90, 'change': -0.67},
+    {'symbol': 'EREGL', 'name': 'Ereğli Demir Çelik', 'price': 43.20, 'change': 0.44},
+    {'symbol': 'BIMAS', 'name': 'BIM Mağazaları', 'price': 412.30, 'change': 1.11},
+    {'symbol': 'FROTO', 'name': 'Ford Otosan', 'price': 892.50, 'change': -0.28},
+    {'symbol': 'SAHOL', 'name': 'Sabancı Holding', 'price': 87.60, 'change': 0.76},
+    {'symbol': 'AKBNK', 'name': 'Akbank', 'price': 56.30, 'change': 0.54},
+    {'symbol': 'ISCTR', 'name': 'İş Bankası', 'price': 14.82, 'change': -0.13},
+    {'symbol': 'TCELL', 'name': 'Turkcell', 'price': 87.90, 'change': 0.23},
+    {'symbol': 'SISE', 'name': 'Şişecam', 'price': 38.74, 'change': 1.45},
+    {'symbol': 'ARCLK', 'name': 'Arçelik', 'price': 112.40, 'change': -0.87},
+]
 
 ALPHA_VANTAGE_KEY = os.environ.get('ALPHA_VANTAGE_KEY', 'demo')
 NEWS_API_KEY = os.environ.get('NEWS_API_KEY', '')
