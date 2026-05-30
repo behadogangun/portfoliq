@@ -16,7 +16,7 @@
                 <div style="position:relative;">
                     <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Asset</label>
                     <input type="text" id="wiSearchInput" class="pq-input" placeholder="Search AAPL, BTC..." autocomplete="off">
-                    <div id="wiSearchResults" style="display:none;position:absolute;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);border:1px solid rgba(0,0,0,0.08);overflow:hidden;z-index:999;min-width:280px;top:100%;left:0;"></div>
+                    <div id="wiSearchResults" style="display:none;position:absolute;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);border:1px solid rgba(0,0,0,0.08);overflow:hidden;z-index:9999;width:100%;top:calc(100% + 4px);left:0;"></div>
                     <input type="hidden" name="symbol" id="wi_symbol" value="{{ request.POST.symbol }}">
                     <input type="hidden" name="asset_type" id="wi_type" value="{{ request.POST.asset_type }}">
                 </div>
