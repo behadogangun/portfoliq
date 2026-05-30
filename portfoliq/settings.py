@@ -163,3 +163,5 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+CSRF_TRUSTED_ORIGINS = ['https://portfoliq.onrender.com']
