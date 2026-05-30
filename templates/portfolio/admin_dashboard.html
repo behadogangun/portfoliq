@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% block title %}Admin Dashboard — PortfoliQ{% endblock %}
+
+{% block content %}
+<div class="page-content" style="max-width:1100px;margin:0 auto;padding:40px 24px;">
+
+    <div class="pq-page-title mb-1">⚙️ Admin Dashboard</div>
+    <div class="pq-page-sub mb-4">System overview — staff only</div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #0071e3;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Total Users</div>
+                <div style="font-size:32px;font-weight:700;color:#0071e3;">{{ total_users }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #1c7f3e;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Portfolios</div>
+                <div style="font-size:32px;font-weight:700;color:#1c7f3e;">{{ total_portfolios }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #ff9500;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Assets</div>
+                <div style="font-size:32px;font-weight:700;color:#ff9500;">{{ total_assets }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="pq-card p-4 text-center" style="border-top:3px solid #5856d6;">
+                <div style="font-size:11px;font-weight:500;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Transactions</div>
+                <div style="font-size:32px;font-weight:700;color:#5856d6;">{{ total_transactions }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Value -->
+    <div class="pq-card p-4 mb-4 text-center" style="background:linear-gradient(135deg,rgba(0,113,227,0.05),transparent);">
+        <div style="font-size:13px;font-weight:500;color:#6e6e73;margin-bottom:8px;">TOTAL PLATFORM VALUE</div>
+        <div style="font-size:36px;font-weight:700;letter-spacing:-1px;">{{ total_value|format_currency }}</div>
+        <div style="font-size:13px;color:#6e6e73;margin-top:4px;">Combined value of all user portfolios</div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <!-- Recent Users -->
+        <div class="col-md-6">
+            <div class="pq-card">
+                <div style="padding:20px 20px 0;font-size:16px;font-weight:600;margin-bottom:4px;">👤 Recent Users</div>
+                <table class="pq-table" style="margin-top:12px;">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th style="text-align:right;">Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users %}
+                        <tr>
+                            <td style="font-weight:600;">{{ user.username }}</td>
+                            <td style="font-size:13px;color:#6e6e73;">{{ user.email|truncatechars:20 }}</td>
+                            <td style="text-align:right;font-size:12px;color:#6e6e73;">{{ user.date_joined|date:"d M Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Asset Type Distribution -->
+        <div class="col-md-6">
+            <div class="pq-card p-4">
+                <div style="font-size:16px;font-weight:600;margin-bottom:16px;">📊 Asset Distribution</div>
+                {% for at in asset_types %}
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+                        <span style="font-weight:500;text-transform:capitalize;">{{ at.asset_type }}</span>
+                        <span style="color:#0071e3;font-weight:600;">{{ at.count }}</span>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.06);border-radius:4px;height:6px;overflow:hidden;">
+                        <div style="height:100%;width:{% widthratio at.count total_assets 100 %}%;background:#0071e3;border-radius:4px;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Assets -->
+    <div class="pq-card mb-4">
+        <div style="padding:20px 20px 0;font-size:16px;font-weight:600;margin-bottom:4px;">🏆 Most Added Assets</div>
+        <table class="pq-table" style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th style="text-align:right;">Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asset in top_assets %}
+                <tr>
+                    <td style="color:#6e6e73;font-size:13px;">{{ forloop.counter }}</td>
+                    <td>
+                        <span style="font-weight:700;padding:3px 10px;border-radius:8px;background:rgba(0,113,227,0.08);color:#0071e3;font-size:13px;">
+                            {{ asset.symbol }}
+                        </span>
+                    </td>
+                    <td style="font-size:13px;">{{ asset.name }}</td>
+                    <td style="text-align:right;font-weight:600;">{{ asset.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent Portfolios -->
+    <div class="pq-card">
+        <div style="padding:20px 20px 0;font-size:16px;font-weight:600;margin-bottom:4px;">💼 Recent Portfolios</div>
+        <table class="pq-table" style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>User</th>
+                    <th style="text-align:right;">Assets</th>
+                    <th style="text-align:right;">Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in recent_portfolios %}
+                <tr>
+                    <td style="font-weight:600;">{{ p.name }}</td>
+                    <td style="font-size:13px;color:#6e6e73;">{{ p.user.username }}</td>
+                    <td style="text-align:right;">{{ p.assets.count }}</td>
+                    <td style="text-align:right;font-size:12px;color:#6e6e73;">{{ p.created_at|date:"d M Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="pq-card p-4 mt-4">
+        <div style="font-size:15px;font-weight:600;margin-bottom:12px;">🔗 Quick Links</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="/admin/" class="btn-apple" style="font-size:13px;padding:6px 14px;">Django Admin</a>
+            <a href="{% url 'dashboard' %}" class="btn-apple-secondary" style="font-size:13px;padding:6px 14px;">Dashboard</a>
+            <a href="{% url 'portfolio_list' %}" class="btn-apple-secondary" style="font-size:13px;padding:6px 14px;">All Portfolios</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

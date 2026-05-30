@@ -1504,3 +1504,49 @@ def currency_converter(request):
         'to_currency': request.POST.get('to_currency', 'TRY'),
         'amount': request.POST.get('amount', '1'),
     })
+
+
+
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def admin_dashboard(request):
+    """Custom Admin Dashboard."""
+    from django.contrib.auth.models import User
+    from django.db.models import Sum, Count
+    
+    # Stats
+    total_users = User.objects.count()
+    total_portfolios = Portfolio.objects.count()
+    total_assets = Asset.objects.count()
+    total_transactions = Transaction.objects.count()
+    
+    # Son kayıtlar
+    recent_users = User.objects.order_by('-date_joined')[:5]
+    recent_portfolios = Portfolio.objects.order_by('-created_at')[:5]
+    
+    # En çok eklenen hisseler
+    top_assets = Asset.objects.values('symbol', 'name').annotate(
+        count=Count('id')
+    ).order_by('-count')[:10]
+    
+    # Portföy değerleri
+    portfolios = Portfolio.objects.prefetch_related('assets').all()
+    total_value = sum(p.total_value() for p in portfolios)
+    
+    # Asset type dağılımı
+    asset_types = Asset.objects.values('asset_type').annotate(
+        count=Count('id')
+    ).order_by('-count')
+
+    return render(request, 'portfolio/admin_dashboard.html', {
+        'total_users': total_users,
+        'total_portfolios': total_portfolios,
+        'total_assets': total_assets,
+        'total_transactions': total_transactions,
+        'recent_users': recent_users,
+        'recent_portfolios': recent_portfolios,
+        'top_assets': top_assets,
+        'total_value': round(total_value, 2),
+        'asset_types': asset_types,
+    })

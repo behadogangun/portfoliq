@@ -55,4 +55,5 @@ urlpatterns = [
     path('crisis/', views.crisis_sim, name='crisis_sim'),
     path('ajax/fetch-prices/', views.fetch_prices_cron, name='fetch_prices_cron'),
     path('converter/', views.currency_converter, name='currency_converter'),
+    path('admin-panel/', views.admin_dashboard, name='admin_dashboard'),
 ]
