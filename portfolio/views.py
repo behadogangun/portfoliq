@@ -1583,10 +1583,15 @@ def admin_dashboard(request):
     import requests as req
     system_status = []
     apis = [
-        ('CoinGecko', 'https://api.coingecko.com/api/v3/ping'),
-        ('Alternative.me', 'https://api.alternative.me/fng/?limit=1'),
-        ('ExchangeRate', 'https://api.exchangerate-api.com/v4/latest/USD'),
-    ]
+    ('CoinGecko', 'https://api.coingecko.com/api/v3/ping'),
+    ('Alternative.me', 'https://api.alternative.me/fng/?limit=1'),
+    ('ExchangeRate', 'https://api.exchangerate-api.com/v4/latest/USD'),
+    ('Twelve Data', f'https://api.twelvedata.com/price?symbol=AAPL&apikey={os.environ.get("TWELVE_DATA_KEY", "")}'),
+    ('NewsAPI', f'https://newsapi.org/v2/top-headlines?country=us&apiKey={os.environ.get("NEWS_API_KEY", "")}&pageSize=1'),
+    ('Finnhub', f'https://finnhub.io/api/v1/quote?symbol=AAPL&token={os.environ.get("FINNHUB_KEY", "")}'),
+    ('FMP', f'https://financialmodelingprep.com/stable/search-symbol?query=AAPL&apikey={os.environ.get("FMP_KEY", "")}'),
+    ('GitHub Actions', 'https://api.github.com/repos/behadogangun/portfoliq/actions/runs?per_page=1'),
+]
     for name, url in apis:
         try:
             r = req.get(url, timeout=5)
