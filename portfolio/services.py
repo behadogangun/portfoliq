@@ -167,9 +167,7 @@ def search_crypto(query):
 
 # --- Hisse ---
 
-
-
-    cache_key = f'stock_info_{symbol.upper()}'
+def get_stock_info(symbol):
     """
     Fetches stock information including price and change from Twelve Data API.
     Falls back to yfinance if Twelve Data is unavailable.
@@ -178,6 +176,8 @@ def search_crypto(query):
     Returns:
         dict with symbol, name, price, change_24h, logo
     """
+    cache_key = f'stock_info_{symbol.upper()}'
+   
     cached = cache.get(cache_key)
     if cached:
         return cached
@@ -282,27 +282,7 @@ def search_stocks(query):
     except Exception:
         return []
 
-    # Fallback: Alpha Vantage
-    try:
-        url = (
-            f'https://www.alphavantage.co/query'
-            f'?function=SYMBOL_SEARCH&keywords={query}&apikey={ALPHA_VANTAGE_KEY}'
-        )
-        r = requests.get(url, timeout=8)
-        matches = r.json().get('bestMatches', [])[:5]
-        results = []
-        for m in matches:
-            if m.get('4. region') == 'United States':
-                symbol = m['1. symbol']
-                results.append({
-                    'symbol': symbol,
-                    'name': m['2. name'],
-                    'logo': f'https://financialmodelingprep.com/image-stock/{symbol}.png',
-                    'type': 'stock',
-                })
-        return results
-    except Exception:
-        return []
+
 
 
 # --- Altın & Döviz ---
@@ -531,7 +511,14 @@ def get_fear_greed_index():
 
 
 
-
+def calculate_portfolio_health(portfolios):
+    """
+    Calculates overall portfolio health score (A-D grade).
+    Args:
+        portfolios: QuerySet of Portfolio objects
+    Returns:
+        dict with score, grade, grade_color, and detailed breakdown
+    """
     all_assets = []
     for p in portfolios:
         all_assets.extend(list(p.assets.all()))
