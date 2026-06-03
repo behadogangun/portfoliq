@@ -165,3 +165,8 @@ else:
     }
 
 CSRF_TRUSTED_ORIGINS = ['https://portfoliq.onrender.com']
+
+
+# Custom error pages
+handler404 = 'portfolio.views.custom_404'
+handler500 = 'portfolio.views.custom_500'

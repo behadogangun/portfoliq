@@ -1621,12 +1621,7 @@ def admin_dashboard(request):
     })
 
 
-def create_superuser(request):
-    from django.contrib.auth.models import User
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@portfoliq.com', 'portfoliq2026!')
-        return HttpResponse('Superuser created! Username: admin, Password: portfoliq2026!')
-    return HttpResponse('Already exists!')
+
 
 
 @login_required
@@ -1634,3 +1629,9 @@ def get_announcement(request):
     from django.core.cache import cache
     msg = cache.get('site_announcement', '')
     return JsonResponse({'message': msg})
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
+
+def custom_500(request):
+    return render(request, '500.html', status=500)
