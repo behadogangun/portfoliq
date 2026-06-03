@@ -99,6 +99,13 @@ TWELVE_DATA_KEY = os.environ.get('TWELVE_DATA_KEY', '')
 # --- Kripto ---
 
 def get_crypto_price(symbol):
+    """
+    Fetches live cryptocurrency price from CoinGecko API.
+    Args:
+        symbol: Crypto symbol (e.g., 'BTC', 'ETH')
+    Returns:
+        float price in USD, or None if unavailable
+    """
     cache_key = f'crypto_price_{symbol.upper()}'
     cached = cache.get(cache_key)
     if cached:
@@ -160,8 +167,17 @@ def search_crypto(query):
 
 # --- Hisse ---
 
-def get_stock_info(symbol):
+
+
     cache_key = f'stock_info_{symbol.upper()}'
+    """
+    Fetches stock information including price and change from Twelve Data API.
+    Falls back to yfinance if Twelve Data is unavailable.
+    Args:
+        symbol: Stock ticker symbol (e.g., 'AAPL', 'TSLA')
+    Returns:
+        dict with symbol, name, price, change_24h, logo
+    """
     cached = cache.get(cache_key)
     if cached:
         return cached
@@ -445,9 +461,16 @@ def get_market_news():
 # --- Risk Metrics ---
 
 def calculate_risk_metrics(prices_list):
-    if len(prices_list) < 2:
+    
+    if len(prices_list) < 2:                
         return None
-
+    """
+    Calculates key risk metrics for an asset based on price history.
+    Args:
+        prices_list: List of historical prices
+    Returns:
+        dict with sharpe_ratio, volatility, max_drawdown, total_return
+    """
     returns = []
     for i in range(1, len(prices_list)):
         if prices_list[i-1] > 0:
