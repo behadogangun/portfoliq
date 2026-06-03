@@ -530,7 +530,8 @@ def get_fear_greed_index():
         return {'value': 50, 'classification': 'Neutral', 'timestamp': ''}
 
 
-def calculate_portfolio_health(portfolios):
+
+
     all_assets = []
     for p in portfolios:
         all_assets.extend(list(p.assets.all()))
