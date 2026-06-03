@@ -104,6 +104,36 @@ PortfoliQ is a full-stack investment portfolio tracker that gives individual inv
 - ✅ `PriceHistory.objects.order_by('-timestamp')` prefetched in all asset queries
 
 ---
+## 🏗️ Architecture & Design
+
+PortfoliQ follows a **service-oriented architecture** within Django's MVT pattern:
+
+- **Models** — 6 core models with proper relationships and constraints
+- **Views** — 45+ function-based views with `@login_required` protection
+- **Services** — Dedicated `services.py` layer for all API integrations and business logic (1,400+ lines)
+- **Templates** — 35+ templates extending `base.html` with block structure
+- **REST API** — Django REST Framework for programmatic access
+- **Caching** — Django LocMemCache with TTL-based invalidation per endpoint
+- **Background Jobs** — GitHub Actions cron for automated price fetching
+
+### Database Design
+
+| Model | Key Fields | Relationships |
+|---|---|---|
+| `Portfolio` | name, created_at | → User (FK) |
+| `Asset` | symbol, name, asset_type, quantity, avg_buy_price | → Portfolio (FK) |
+| `Transaction` | transaction_type, quantity, price, date | → Asset (FK) |
+| `PriceHistory` | price, timestamp | → Asset (FK) |
+| `PriceAlert` | symbol, target_price, alert_type, is_triggered | → User (FK) |
+| `WatchlistItem` | symbol, name, asset_type | → User (FK) |
+
+### Key Design Decisions
+
+- **Service Layer** — All external API calls isolated in `services.py` for testability and reusability
+- **Graceful Degradation** — Every API call has try/except with hardcoded fallbacks
+- **Cache Strategy** — Crypto prices: 60s, Market mood: 5min, Earnings: 1hr
+- **Security** — Cross-user data access prevented via `user=request.user` on all queries
+- **ORM Optimization** — `select_related` and `prefetch_related` on all multi-join queries
 
 ## 🛠️ Tech Stack
 
