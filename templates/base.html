@@ -128,9 +128,32 @@
         body.dark .pq-mobile-link { color: #f5f5f7; }
         body.dark .pq-mobile-link:hover { background: rgba(255,255,255,0.06); }
         body.dark #mobileMenu { background: rgba(28,28,30,0.97); border-bottom-color: rgba(255,255,255,0.08); }
-        .pq-mobile-link { display: flex; align-items: center; padding: 12px 8px; font-size: 15px; color: #1d1d1f; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.04); border-radius: 8px; transition: background 0.1s; }
+
+        /* ===== MOBILE MENU LINKS ===== */
+        .pq-mobile-link {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            padding: 12px 8px;
+            font-size: 15px;
+            color: #1d1d1f;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            border-radius: 8px;
+            transition: background 0.1s;
+            word-break: normal;
+            overflow-wrap: normal;
+        }
         .pq-mobile-link:hover { background: rgba(0,0,0,0.04); color: #1d1d1f; }
+        .pq-mobile-link i {
+            flex-shrink: 0;
+            width: 20px;
+            text-align: center;
+            margin-right: 8px;
+        }
         .pq-mobile-section { font-size: 11px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 8px 4px; }
+
         @media (max-width: 768px) {
             .pq-nav { padding: 0 16px; height: 48px; }
             .pq-desktop-links { display: none !important; }
@@ -141,79 +164,73 @@
         }
 
         /* ===== GLOBAL MOBILE FIX ===== */
-@media (max-width: 768px) {
+        @media (max-width: 768px) {
 
-    /* Tüm tablolar scroll edilebilir */
-    table {
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        white-space: nowrap;
-        width: 100%;
-    }
+            /* Tüm tablolar scroll edilebilir */
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+                width: 100%;
+            }
 
-    /* Tablo hücreleri min genişlik */
-    td, th {
-        min-width: 80px;
-        padding: 8px 10px !important;
-        font-size: 13px !important;
-    }
+            /* Tablo hücreleri min genişlik */
+            td, th {
+                min-width: 80px;
+                padding: 8px 10px !important;
+                font-size: 13px !important;
+            }
 
-    /* Tüm kartlar padding azalt */
-    .card, [class*="card"] {
-        padding: 16px !important;
-        border-radius: 12px !important;
-    }
+            /* Tüm kartlar padding azalt */
+            .card, [class*="card"] {
+                padding: 16px !important;
+                border-radius: 12px !important;
+            }
 
-    /* Tüm chart container'lar */
-    canvas {
-        max-width: 100% !important;
-        height: auto !important;
-    }
+            /* Tüm chart container'lar */
+            canvas {
+                max-width: 100% !important;
+                height: auto !important;
+            }
 
-    /* Chart wrapper'lar yükseklik sınırla */
-    [class*="chart"], .chart-container {
-        overflow: hidden;
-        width: 100% !important;
-    }
+            /* Chart wrapper'lar yükseklik sınırla */
+            [class*="chart"], .chart-container {
+                overflow: hidden;
+                width: 100% !important;
+            }
 
-    /* Grid'ler tek sütuna düş */
-    [class*="grid"], .row {
-        grid-template-columns: 1fr !important;
-    }
+            /* Grid'ler tek sütuna düş */
+            [class*="grid"], .row {
+                grid-template-columns: 1fr !important;
+            }
 
-    /* Uzun text'ler taşmasın */
-    p, span, td, th, a, h1, h2, h3, h4, h5 {
-        word-break: break-word;
-        overflow-wrap: break-word;
-    }
+            /* Input/select/button tam genişlik */
+            input, select, textarea {
+                width: 100% !important;
+                font-size: 16px !important; /* iOS zoom engelle */
+            }
 
-    /* Input/select/button tam genişlik */
-    input, select, textarea {
-        width: 100% !important;
-        font-size: 16px !important; /* iOS zoom engelle */
-    }
+            /* Flex satırlar wrap yapsın — mobile link hariç */
+            .d-flex:not(.pq-mobile-link), [class*="flex"]:not(.pq-mobile-link) {
+                flex-wrap: wrap;
+            }
 
-    /* Flex satırlar wrap yapsın */
-    .d-flex, [class*="flex"] {
-        flex-wrap: wrap;
-    }
+            /* Stat kartları 2'li grid */
+            .stat-card {
+                min-width: calc(50% - 8px) !important;
+            }
 
-    /* Stat kartları 2'li grid */
-    .stat-card {
-        min-width: calc(50% - 8px) !important;
-    }
+            /* Page title küçült */
+            .pq-page-title {
+                font-size: 22px !important;
+            }
 
-    /* Page title küçült */
-    .pq-page-title {
-        font-size: 22px !important;
-    }
-
-    /* Overflow hidden olan container'lar */
-    .container, .container-fluid, main, section {
-        overflow-x: hidden;
-    }
-}
+            /* Overflow hidden olan container'lar */
+            .container, .container-fluid, main, section {
+                overflow-x: hidden;
+            }
+        }
     </style>
 </head>
 <body>
@@ -266,25 +283,12 @@
                     <div class="menu-label">Market Intel</div>
                     <a href="{% url 'ipo_tracker' %}"><i class="bi bi-rocket" style="color:#5856d6;"></i> IPO Tracker</a>
                     <a href="{% url 'insider_trading' %}"><i class="bi bi-person-badge" style="color:#ff9500;"></i> Insider Trading</a>
-                    <a href="{% url 'economic_calendar' %}">
-    <i class="bi bi-calendar-event" style="color:#0071e3;"></i> Economic Calendar
-</a>
-<a href="{% url 'market_mood' %}">
-    <i class="bi bi-emoji-smile" style="color:#ff9500;"></i> Market Mood Ring
-</a>
-<a href="{% url 'earnings_calendar' %}">
-    <i class="bi bi-calendar-check" style="color:#1c7f3e;"></i> Earnings Calendar
-</a>
-<a href="{% url 'short_squeeze' %}">
-    <i class="bi bi-lightning-charge" style="color:#ff9500;"></i> Short Squeeze
-</a>
-<a href="{% url 'famous_investors' %}">
-    <i class="bi bi-trophy" style="color:#b36200;"></i> Famous Investors
-</a>
-<a href="{% url 'crisis_sim' %}">
-    <i class="bi bi-exclamation-triangle" style="color:#c4162a;"></i> Crisis Simulator
-</a>
-
+                    <a href="{% url 'economic_calendar' %}"><i class="bi bi-calendar-event" style="color:#0071e3;"></i> Economic Calendar</a>
+                    <a href="{% url 'market_mood' %}"><i class="bi bi-emoji-smile" style="color:#ff9500;"></i> Market Mood Ring</a>
+                    <a href="{% url 'earnings_calendar' %}"><i class="bi bi-calendar-check" style="color:#1c7f3e;"></i> Earnings Calendar</a>
+                    <a href="{% url 'short_squeeze' %}"><i class="bi bi-lightning-charge" style="color:#ff9500;"></i> Short Squeeze</a>
+                    <a href="{% url 'famous_investors' %}"><i class="bi bi-trophy" style="color:#b36200;"></i> Famous Investors</a>
+                    <a href="{% url 'crisis_sim' %}"><i class="bi bi-exclamation-triangle" style="color:#c4162a;"></i> Crisis Simulator</a>
                 </div>
             </div>
 
@@ -307,9 +311,7 @@
                     <div class="menu-label">Trackers</div>
                     <a href="{% url 'dividend_tracker' %}"><i class="bi bi-cash-coin" style="color:#1c7f3e;"></i> Dividend Tracker</a>
                     <a href="{% url 'price_targets' %}"><i class="bi bi-bullseye" style="color:#c4162a;"></i> Price Targets</a>
-                    <a href="{% url 'currency_converter' %}">
-    <i class="bi bi-currency-exchange" style="color:#0071e3;"></i> Currency Converter
-</a>
+                    <a href="{% url 'currency_converter' %}"><i class="bi bi-currency-exchange" style="color:#0071e3;"></i> Currency Converter</a>
                 </div>
             </div>
 
@@ -343,11 +345,9 @@
                 <li><a class="pq-dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Profile</a></li>
                 <li><hr style="margin:4px 0;border-color:rgba(0,0,0,0.08)"></li>
                 {% if user.is_staff %}
-<li><a class="pq-dropdown-item" href="{% url 'admin_dashboard' %}">
-    <i class="bi bi-gear me-2"></i> Admin Panel
-</a></li>
-<li><hr style="margin:4px 0;border-color:rgba(0,0,0,0.08)"></li>
-{% endif %}
+                <li><a class="pq-dropdown-item" href="{% url 'admin_dashboard' %}"><i class="bi bi-gear me-2"></i> Admin Panel</a></li>
+                <li><hr style="margin:4px 0;border-color:rgba(0,0,0,0.08)"></li>
+                {% endif %}
                 <li><a class="pq-dropdown-item danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a></li>
             </ul>
         </div>
@@ -371,41 +371,40 @@ fetch('/ajax/announcement/')
 
 <!-- Mobile Menu -->
 <div id="mobileMenu" style="display:none;position:fixed;top:48px;left:0;right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.08);z-index:999;padding:8px 16px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.1);max-height:80vh;overflow-y:auto;">
-    <a href="{% url 'dashboard' %}" class="pq-mobile-link"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
-    <a href="{% url 'portfolio_list' %}" class="pq-mobile-link"><i class="bi bi-briefcase me-2"></i> Portfolios</a>
-    <a href="{% url 'market' %}" class="pq-mobile-link"><i class="bi bi-graph-up me-2"></i> Market</a>
-    <a href="{% url 'watchlist' %}" class="pq-mobile-link"><i class="bi bi-eye me-2"></i> Watchlist</a>
-    <a href="{% url 'alerts' %}" class="pq-mobile-link"><i class="bi bi-bell me-2"></i> Alerts</a>
-    <a href="{% url 'news' %}" class="pq-mobile-link"><i class="bi bi-newspaper me-2"></i> News</a>
+    <a href="{% url 'dashboard' %}" class="pq-mobile-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="{% url 'portfolio_list' %}" class="pq-mobile-link"><i class="bi bi-briefcase"></i> Portfolios</a>
+    <a href="{% url 'market' %}" class="pq-mobile-link"><i class="bi bi-graph-up"></i> Market</a>
+    <a href="{% url 'watchlist' %}" class="pq-mobile-link"><i class="bi bi-eye"></i> Watchlist</a>
+    <a href="{% url 'alerts' %}" class="pq-mobile-link"><i class="bi bi-bell"></i> Alerts</a>
+    <a href="{% url 'news' %}" class="pq-mobile-link"><i class="bi bi-newspaper"></i> News</a>
     <div class="pq-mobile-section">Analytics</div>
-    <a href="{% url 'intelligence' %}" class="pq-mobile-link"><i class="bi bi-lightbulb me-2"></i> Portfolio Intelligence</a>
-    <a href="{% url 'heatmap' %}" class="pq-mobile-link"><i class="bi bi-grid-3x3 me-2"></i> Market Heatmap</a>
-    <a href="{% url 'sector_rotation' %}" class="pq-mobile-link"><i class="bi bi-pie-chart me-2"></i> Sector Rotation</a>
-    <a href="{% url 'portfolio_beta' %}" class="pq-mobile-link"><i class="bi bi-activity me-2"></i> Portfolio Beta</a>
-    <a href="{% url 'volatility_chart' %}" class="pq-mobile-link"><i class="bi bi-activity me-2"></i> Volatility Chart</a>
-    <a href="{% url 'monte_carlo' %}" class="pq-mobile-link"><i class="bi bi-dice-5 me-2"></i> Monte Carlo</a>
-    <a href="{% url 'efficient_frontier' %}" class="pq-mobile-link"><i class="bi bi-graph-up-arrow me-2"></i> Efficient Frontier</a>
-    <a href="{% url 'ipo_tracker' %}" class="pq-mobile-link"><i class="bi bi-rocket me-2"></i> IPO Tracker</a>
-    <a href="{% url 'insider_trading' %}" class="pq-mobile-link"><i class="bi bi-person-badge me-2"></i> Insider Trading</a>
-    <a href="{% url 'economic_calendar' %}" class="pq-mobile-link"><i class="bi bi-calendar-event me-2"></i> Economic Calendar</a>
-    <a href="{% url 'market_mood' %}" class="pq-mobile-link"><i class="bi bi-emoji-smile me-2"></i> Market Mood Ring</a>
-    <a href="{% url 'earnings_calendar' %}" class="pq-mobile-link"><i class="bi bi-calendar-check me-2"></i> Earnings Calendar</a>
-    <a href="{% url 'short_squeeze' %}" class="pq-mobile-link"><i class="bi bi-lightning-charge me-2"></i> Short Squeeze</a>
-    <a href="{% url 'famous_investors' %}" class="pq-mobile-link"><i class="bi bi-trophy me-2"></i> Famous Investors</a>
-    <a href="{% url 'crisis_sim' %}" class="pq-mobile-link"><i class="bi bi-exclamation-triangle me-2"></i> Crisis Simulator</a>
-    
+    <a href="{% url 'intelligence' %}" class="pq-mobile-link"><i class="bi bi-lightbulb"></i> Portfolio Intelligence</a>
+    <a href="{% url 'heatmap' %}" class="pq-mobile-link"><i class="bi bi-grid-3x3"></i> Market Heatmap</a>
+    <a href="{% url 'sector_rotation' %}" class="pq-mobile-link"><i class="bi bi-pie-chart"></i> Sector Rotation</a>
+    <a href="{% url 'portfolio_beta' %}" class="pq-mobile-link"><i class="bi bi-activity"></i> Portfolio Beta</a>
+    <a href="{% url 'volatility_chart' %}" class="pq-mobile-link"><i class="bi bi-activity"></i> Volatility Chart</a>
+    <a href="{% url 'monte_carlo' %}" class="pq-mobile-link"><i class="bi bi-dice-5"></i> Monte Carlo</a>
+    <a href="{% url 'efficient_frontier' %}" class="pq-mobile-link"><i class="bi bi-graph-up-arrow"></i> Efficient Frontier</a>
+    <a href="{% url 'ipo_tracker' %}" class="pq-mobile-link"><i class="bi bi-rocket"></i> IPO Tracker</a>
+    <a href="{% url 'insider_trading' %}" class="pq-mobile-link"><i class="bi bi-person-badge"></i> Insider Trading</a>
+    <a href="{% url 'economic_calendar' %}" class="pq-mobile-link"><i class="bi bi-calendar-event"></i> Economic Calendar</a>
+    <a href="{% url 'market_mood' %}" class="pq-mobile-link"><i class="bi bi-emoji-smile"></i> Market Mood Ring</a>
+    <a href="{% url 'earnings_calendar' %}" class="pq-mobile-link"><i class="bi bi-calendar-check"></i> Earnings Calendar</a>
+    <a href="{% url 'short_squeeze' %}" class="pq-mobile-link"><i class="bi bi-lightning-charge"></i> Short Squeeze</a>
+    <a href="{% url 'famous_investors' %}" class="pq-mobile-link"><i class="bi bi-trophy"></i> Famous Investors</a>
+    <a href="{% url 'crisis_sim' %}" class="pq-mobile-link"><i class="bi bi-exclamation-triangle"></i> Crisis Simulator</a>
     <div class="pq-mobile-section">Tools</div>
-    <a href="{% url 'whatif' %}" class="pq-mobile-link"><i class="bi bi-calculator me-2"></i> What-If Simulator</a>
-    <a href="{% url 'regret' %}" class="pq-mobile-link"><i class="bi bi-arrow-left-right me-2"></i> Regret Calculator</a>
-    <a href="{% url 'breakeven' %}" class="pq-mobile-link"><i class="bi bi-bar-chart me-2"></i> Break-Even</a>
-    <a href="{% url 'dca_planner' %}" class="pq-mobile-link"><i class="bi bi-calendar-check me-2"></i> DCA Planner</a>
-    <a href="{% url 'dividend_tracker' %}" class="pq-mobile-link"><i class="bi bi-cash-coin me-2"></i> Dividend Tracker</a>
-    <a href="{% url 'price_targets' %}" class="pq-mobile-link"><i class="bi bi-bullseye me-2"></i> Price Targets</a>
-    <a href="{% url 'portfolio_comparison' %}" class="pq-mobile-link"><i class="bi bi-layout-split me-2"></i> Portfolio Compare</a>
-    <a href="{% url 'currency_converter' %}" class="pq-mobile-link"><i class="bi bi-currency-exchange me-2"></i> Currency Converter</a>
+    <a href="{% url 'whatif' %}" class="pq-mobile-link"><i class="bi bi-calculator"></i> What-If Simulator</a>
+    <a href="{% url 'regret' %}" class="pq-mobile-link"><i class="bi bi-arrow-left-right"></i> Regret Calculator</a>
+    <a href="{% url 'breakeven' %}" class="pq-mobile-link"><i class="bi bi-bar-chart"></i> Break-Even</a>
+    <a href="{% url 'dca_planner' %}" class="pq-mobile-link"><i class="bi bi-calendar-check"></i> DCA Planner</a>
+    <a href="{% url 'dividend_tracker' %}" class="pq-mobile-link"><i class="bi bi-cash-coin"></i> Dividend Tracker</a>
+    <a href="{% url 'price_targets' %}" class="pq-mobile-link"><i class="bi bi-bullseye"></i> Price Targets</a>
+    <a href="{% url 'portfolio_comparison' %}" class="pq-mobile-link"><i class="bi bi-layout-split"></i> Portfolio Compare</a>
+    <a href="{% url 'currency_converter' %}" class="pq-mobile-link"><i class="bi bi-currency-exchange"></i> Currency Converter</a>
     <div class="pq-mobile-section">🇹🇷 Turkey</div>
-    <a href="{% url 'bist_market' %}" class="pq-mobile-link"><i class="bi bi-building me-2"></i> BIST Market</a>
-    <a href="{% url 'logout' %}" class="pq-mobile-link" style="color:#c4162a;margin-top:8px;border-top:1px solid rgba(0,0,0,0.08);"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a>
+    <a href="{% url 'bist_market' %}" class="pq-mobile-link"><i class="bi bi-building"></i> BIST Market</a>
+    <a href="{% url 'logout' %}" class="pq-mobile-link" style="color:#c4162a;margin-top:8px;border-top:1px solid rgba(0,0,0,0.08);"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
 </div>
 
 <!-- Onboarding -->
